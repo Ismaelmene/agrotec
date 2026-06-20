@@ -869,20 +869,46 @@ h3{font-size:16px;font-weight:600}
         </div>
       </div>
       <div class="input-group">
-        <label class="input-label">Quantidade <span style="color:var(--text3);font-weight:400">(ex: 80 frangos, 2 hectares)</span></label>
+        <label class="input-label">Quantidade <span style="color:var(--text3);font-weight:400">(texto, ex: 80 frangos, 2 hectares)</span></label>
         <input class="input" id="cicloQuantidade" placeholder="Ex: 80 frangos">
       </div>
+      <div class="input-group">
+        <label class="input-label">Quantidade numérica <span style="color:var(--text3);font-weight:400">(ex: 80, ou 2)</span></label>
+        <input class="input" id="cicloQuantidadeNum" type="number" placeholder="Ex: 80">
+      </div>
+
+      <div class="divider"></div>
+      <p class="label" style="margin-bottom:10px">💰 PREVISÃO FINANCEIRA</p>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="input-group">
-          <label class="input-label">Orçamento limite (R$)</label>
-          <input class="input" id="cicloOrcamento" type="number" placeholder="0,00">
+          <label class="input-label">Preço de compra <span style="color:var(--text3);font-weight:400">(por unidade)</span></label>
+          <input class="input" id="cicloPrecoCompra" type="number" placeholder="0,00">
         </div>
         <div class="input-group">
-          <label class="input-label">Receita prevista (R$)</label>
-          <input class="input" id="cicloReceitaPrev" type="number" placeholder="0,00">
+          <label class="input-label">Preço de venda pretendido <span style="color:var(--text3);font-weight:400">(por unidade)</span></label>
+          <input class="input" id="cicloPrecoVenda" type="number" placeholder="0,00">
         </div>
       </div>
-      <button class="btn btn-primary" style="width:100%" onclick="salvarAtividade()">
+      <div class="input-group">
+        <label class="input-label">Valor previsto para gastos extras <span style="color:var(--text3);font-weight:400">(ração, vacina, mão de obra, etc.)</span></label>
+        <input class="input" id="cicloOrcamento" type="number" placeholder="0,00">
+      </div>
+
+      <div id="resumoFinanceiro" style="background:var(--green-dim);border-radius:10px;padding:14px;margin:14px 0;display:none">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:6px">Resumo da previsão</p>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span>Receita prevista total</span><strong id="resumoReceita" style="color:var(--green)">R$ 0</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span>Orçamento total (compra + gastos)</span><strong id="resumoOrcamento" style="color:var(--red2)">R$ 0</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;padding-top:6px;border-top:1px solid var(--green-border)">
+          <span>Margem projetada</span><strong id="resumoMargem">R$ 0</strong>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" id="btnSalvarAtividade" onclick="salvarAtividade()">
         <i class="ti ti-check"></i> Criar atividade
       </button>
     </div>
@@ -1298,8 +1324,13 @@ window.abrirModalNovaAtividade = function() {
   document.getElementById('cicloDataInicio').value = new Date().toISOString().split('T')[0];
   document.getElementById('cicloDataFim').value = '';
   document.getElementById('cicloQuantidade').value = '';
+  document.getElementById('cicloQuantidadeNum').value = '';
+  document.getElementById('cicloPrecoCompra').value = '';
+  document.getElementById('cicloPrecoVenda').value = '';
   document.getElementById('cicloOrcamento').value = '';
-  document.getElementById('cicloReceitaPrev').value = '';
+  document.getElementById('resumoFinanceiro').style.display = 'none';
+  const btn = document.getElementById('btnSalvarAtividade');
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Criar atividade';
   _tipoAtividade = null; _iconeAtividade = '🌱';
   ['tipoCriacao','tipoPlantacao','tipoInfraestrutura'].forEach(id => {
     const el = document.getElementById(id);
@@ -1309,6 +1340,31 @@ window.abrirModalNovaAtividade = function() {
   picker.innerHTML = ICONES.map(ic => `<button onclick="selecionarIcone('${ic}',this)" style="font-size:24px;background:none;border:2px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;transition:border-color .15s">${ic}</button>`).join('');
   document.getElementById('modalNovaAtividade').classList.add('open');
 };
+
+// Recalcula o resumo financeiro em tempo real conforme o produtor digita
+function atualizarResumoFinanceiro(){
+  const qtd = parseFloat(document.getElementById('cicloQuantidadeNum').value) || 0;
+  const precoCompra = parseFloat(document.getElementById('cicloPrecoCompra').value) || 0;
+  const precoVenda = parseFloat(document.getElementById('cicloPrecoVenda').value) || 0;
+  const gastosExtra = parseFloat(document.getElementById('cicloOrcamento').value) || 0;
+
+  const box = document.getElementById('resumoFinanceiro');
+  if(qtd<=0 || (precoCompra<=0 && precoVenda<=0)){ box.style.display='none'; return; }
+
+  const receita = precoVenda * qtd;
+  const orcamentoTotal = (precoCompra * qtd) + gastosExtra;
+  const margem = receita - orcamentoTotal;
+
+  document.getElementById('resumoReceita').textContent = 'R$ ' + receita.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('resumoOrcamento').textContent = 'R$ ' + orcamentoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const margemEl = document.getElementById('resumoMargem');
+  margemEl.textContent = 'R$ ' + margem.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  margemEl.style.color = margem >= 0 ? 'var(--green)' : 'var(--red2)';
+  box.style.display = 'block';
+}
+['cicloQuantidadeNum','cicloPrecoCompra','cicloPrecoVenda','cicloOrcamento'].forEach(id=>{
+  document.addEventListener('input', e=>{ if(e.target.id===id) atualizarResumoFinanceiro(); });
+});
 
 window.selecionarTipoAtividade = function(tipo) {
   _tipoAtividade = tipo;
@@ -1340,39 +1396,70 @@ window.voltarStep1 = function() {
 };
 
 window.salvarAtividade = async function() {
+  const btn = document.getElementById('btnSalvarAtividade');
+  if (btn.disabled) return; // trava contra duplo clique
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
   const nome = document.getElementById('atividadeNome').value.trim();
   const categorias = document.getElementById('atividadeCategorias').value.split(',').map(c => c.trim()).filter(Boolean);
   const cicloNome = document.getElementById('cicloNomeInput').value.trim();
   const quantidade = document.getElementById('cicloQuantidade').value.trim();
+  const precoCompra = parseFloat(document.getElementById('cicloPrecoCompra').value) || 0;
   const orcamento = parseFloat(document.getElementById('cicloOrcamento').value) || 0;
-  const receitaPrevista = parseFloat(document.getElementById('cicloReceitaPrev').value) || 0;
+  const precoVendaPrevisto = parseFloat(document.getElementById('cicloPrecoVenda').value) || 0;
+  const quantidadeNum = parseFloat(document.getElementById('cicloQuantidadeNum').value) || 0;
   const dataInicio = document.getElementById('cicloDataInicio').value;
   const dataFim = document.getElementById('cicloDataFim').value;
-  if (!cicloNome || !quantidade) { showToast('Preencha nome do ciclo e quantidade'); return; }
+
+  if (!cicloNome || !quantidade) {
+    showToast('Preencha nome do ciclo e quantidade');
+    btn.disabled = false; btn.textContent = '✓ Criar atividade';
+    return;
+  }
+
+  // Receita prevista = preço de venda pretendido × quantidade
+  const receitaPrevista = precoVendaPrevisto * quantidadeNum;
+  // Orçamento total = preço de compra inicial (animais/mudas) + valor previsto de gastos durante o ciclo
+  const orcamentoTotal = (precoCompra * quantidadeNum) + orcamento;
+
   try {
-    const atividadeRef = await addDoc(collection(db, 'atividades'), {
+    await addDoc(collection(db, 'atividades'), {
       sitioId: _sitioId, nome, tipo: _tipoAtividade, icone: _iconeAtividade,
       categorias: categorias.length ? categorias : ['Geral'],
       ativa: true, criadoEm: new Date().toISOString(),
-      cicloAtual: { nome: cicloNome, quantidade, orcamento, receitaPrevista, dataInicio, dataFim, gastoTotal: 0, perdasTotal: 0 }
+      cicloAtual: {
+        nome: cicloNome, quantidade, quantidadeNum,
+        precoCompra, precoVendaPrevisto,
+        orcamento: orcamentoTotal, receitaPrevista,
+        dataInicio, dataFim, gastoTotal: precoCompra * quantidadeNum, perdasTotal: 0
+      }
     });
     fecharModal('modalNovaAtividade');
     showToast('✓ Atividade criada com sucesso!');
     await carregarAtividades();
-  } catch(e) { showToast('Erro: ' + e.message); }
+  } catch(e) {
+    showToast('Erro: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '✓ Criar atividade';
+  }
 };
 
 // ── CICLO ──
 window.abrirCiclo = async function(atividadeId) {
-  const snap = await getDoc(doc(db, 'atividades', atividadeId));
-  if (!snap.exists()) return;
-  _atividadeAtual = { id: atividadeId, ...snap.data() };
-  _cicloAtual = _atividadeAtual.cicloAtual;
-  document.getElementById('cicloNomeTop').textContent = _atividadeAtual.nome;
-  renderCiclo();
-  await carregarCustos();
-  await carregarPerdas();
-  showScreen('ciclo');
+  try {
+    const snap = await getDoc(doc(db, 'atividades', atividadeId));
+    if (!snap.exists()) { showToast('Atividade não encontrada'); return; }
+    _atividadeAtual = { id: atividadeId, ...snap.data() };
+    _cicloAtual = _atividadeAtual.cicloAtual;
+    document.getElementById('cicloNomeTop').textContent = _atividadeAtual.nome;
+    showScreen('ciclo'); // mostra a tela primeiro, dados carregam em seguida
+    renderCiclo();
+    await carregarCustos();
+    await carregarPerdas();
+  } catch(e) {
+    console.error('Erro ao abrir ciclo:', e);
+    showToast('Erro ao abrir atividade: ' + e.message);
+  }
 };
 
 function renderCiclo() {
@@ -1398,36 +1485,47 @@ function renderCiclo() {
 
 async function carregarCustos() {
   if (!_atividadeAtual) return;
-  const q = query(collection(db, 'lancamentos'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome), orderBy('data', 'desc'));
-  const snap = await getDocs(q);
-  const custos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const container = document.getElementById('custosContainer');
-  if (!custos.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhum custo lançado ainda</p>'; return; }
-  container.innerHTML = custos.map(c => `<div class="custo-row">
-    <div class="custo-icon"><i class="ti ti-cash" style="color:var(--green)"></i></div>
-    <div class="custo-info">
-      <p class="custo-desc">${c.descricao}</p>
-      <p class="custo-meta">${c.categoria} • ${c.data} • ${c.usuario}</p>
-    </div>
-    <span class="custo-val">R$ ${fmtNum(c.valor)}</span>
-  </div>`).join('');
+  try {
+    const q = query(collection(db, 'lancamentos'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome));
+    const snap = await getDocs(q);
+    const custos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b) => new Date(b.data||0) - new Date(a.data||0)); // ordena no cliente, evita exigir índice composto
+    if (!custos.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhum custo lançado ainda</p>'; return; }
+    container.innerHTML = custos.map(c => `<div class="custo-row">
+      <div class="custo-icon"><i class="ti ti-cash" style="color:var(--green)"></i></div>
+      <div class="custo-info">
+        <p class="custo-desc">${c.descricao}</p>
+        <p class="custo-meta">${c.categoria} • ${c.data} • ${c.usuario}</p>
+      </div>
+      <span class="custo-val">R$ ${fmtNum(c.valor)}</span>
+    </div>`).join('');
+  } catch(e) {
+    console.error('Erro ao carregar custos:', e);
+    container.innerHTML = `<p style="color:var(--red2);font-size:13px;text-align:center;padding:20px">Erro ao carregar custos: ${e.message}</p>`;
+  }
 }
 
 async function carregarPerdas() {
   if (!_atividadeAtual) return;
-  const q = query(collection(db, 'perdas'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome));
-  const snap = await getDocs(q);
-  const perdas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const container = document.getElementById('perdasContainer');
-  if (!perdas.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhuma perda registrada</p>'; return; }
-  container.innerHTML = perdas.map(p => `<div class="custo-row">
-    <div class="custo-icon" style="background:var(--red-dim)"><i class="ti ti-alert-triangle" style="color:var(--red2)"></i></div>
-    <div class="custo-info">
-      <p class="custo-desc">${p.tipo === 'mortalidade' ? `${p.quantidade} animal(is) — ${p.causa}` : p.descricao}</p>
-      <p class="custo-meta">${p.tipo === 'mortalidade' ? 'Mortalidade' : 'Perda de produção'} • ${p.data}</p>
-    </div>
-    <span class="custo-val perda">-R$ ${fmtNum(p.valorTotal)}</span>
-  </div>`).join('');
+  try {
+    const q = query(collection(db, 'perdas'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome));
+    const snap = await getDocs(q);
+    const perdas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!perdas.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhuma perda registrada</p>'; return; }
+    container.innerHTML = perdas.map(p => `<div class="custo-row">
+      <div class="custo-icon" style="background:var(--red-dim)"><i class="ti ti-alert-triangle" style="color:var(--red2)"></i></div>
+      <div class="custo-info">
+        <p class="custo-desc">${p.tipo === 'mortalidade' ? `${p.quantidade} animal(is) — ${p.causa}` : p.descricao}</p>
+        <p class="custo-meta">${p.tipo === 'mortalidade' ? 'Mortalidade' : 'Perda de produção'} • ${p.data}</p>
+      </div>
+      <span class="custo-val perda">-R$ ${fmtNum(p.valorTotal)}</span>
+    </div>`).join('');
+  } catch(e) {
+    console.error('Erro ao carregar perdas:', e);
+    container.innerHTML = `<p style="color:var(--red2);font-size:13px;text-align:center;padding:20px">Erro ao carregar perdas: ${e.message}</p>`;
+  }
 }
 
 // ── LANÇAR CUSTO ──
