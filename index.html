@@ -1845,8 +1845,13 @@ Retorne JSON:
     _formulacaoAtual = { tipo, tituloPag, result, dados: { tipo } };
     renderFormulacao(result);
   } catch(e) {
-    showToast('Erro ao gerar formulação: ' + e.message);
-    voltarFormulacao();
+    document.getElementById('ingredientesContainer').innerHTML = `
+      <div style="text-align:center;padding:24px">
+        <i class="ti ti-cloud-off" style="font-size:36px;color:var(--text3);display:block;margin-bottom:10px"></i>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:4px;font-weight:500">Não foi possível gerar a formulação</p>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:16px">${e.message}</p>
+        <button class="btn btn-primary btn-sm" onclick="gerarFormulacao('${tipo}')"><i class="ti ti-refresh"></i> Tentar novamente</button>
+      </div>`;
   }
 };
 
