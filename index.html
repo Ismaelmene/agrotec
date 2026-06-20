@@ -150,8 +150,8 @@ h3{font-size:16px;font-weight:600}
 .plan-popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:#1A1A1A;color:#fff;border-radius:var(--radius);padding:12px 20px;font-size:13px;z-index:999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:#1A1A1A;color:#fff;border-radius:var(--radius);padding:12px 20px;font-size:13px;z-index:999;transition:transform .3s,opacity .3s;white-space:nowrap;max-width:90vw;text-align:center;opacity:0;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:48px 24px;color:var(--text3)}
@@ -533,7 +533,12 @@ h3{font-size:16px;font-weight:600}
         <input type="file" id="fotoPastoInput" accept="image/*" style="display:none" onchange="onFotoPasto(event)">
         <img id="fotoPastoPreview" style="display:none;width:100%;border-radius:var(--radius);margin-top:8px;max-height:200px;object-fit:cover" src="" alt="Foto do pasto">
       </div>
-      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('bovinos')">
+      <div class="input-group">
+        <label class="input-label">Matérias-primas disponíveis na sua região</label>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Desmarque o que você não tem acesso fácil. Sal branco, núcleo e milho são sempre obrigatórios.</p>
+        <div id="ingredientesDisponiveisPicker" class="gap" style="gap:8px"></div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('bovinos', _ingredientesExcluidos)">
         <i class="ti ti-sparkles"></i> Gerar formulação
       </button>
     </div>
@@ -609,10 +614,13 @@ h3{font-size:16px;font-weight:600}
     <!-- Resultado formulação -->
     <div id="resultadoFormulacao" style="display:none">
       <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Nova formulação</button>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <h2 id="resultadoTitulo">Formulação</h2>
         <button class="btn btn-sm btn-secondary" onclick="salvarFormulacao()"><i class="ti ti-bookmark"></i> Salvar</button>
       </div>
+      <button id="btnAjustarIngredientes" style="display:none;background:none;border:none;color:var(--green);font-size:13px;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif" onclick="ajustarIngredientesEReformular()">
+        <i class="ti ti-adjustments"></i> Não tenho acesso a algum ingrediente — ajustar e refazer
+      </button>
 
       <div id="pastAnalise" style="display:none" class="card" style="margin-bottom:16px;background:var(--green-dim);border-color:var(--green-border)">
         <p class="label" style="margin-bottom:6px">Análise do pasto</p>
@@ -1126,6 +1134,15 @@ let _planoPlanoSelecionado = null;
 let _fotoPastoBase64 = null;
 let _formulacaoAtual = null;
 let _abaPerda = 'mortalidade';
+let _ingredientesExcluidos = []; // matérias-primas que o produtor não tem acesso (só bovinos)
+
+// Matérias-primas disponíveis para formulação de bovinos (realidade do pequeno produtor)
+const INGREDIENTES_BOVINOS = [
+  'Milho triturado', 'Farelo de soja', 'Torta de algodão', 'Sorgo',
+  'DDG de milho', 'Ureia pecuária', 'Núcleo mineral Tortuga', 'Sal branco'
+];
+// Itens que o produtor NUNCA pode remover da simulação
+const INGREDIENTES_BOVINOS_OBRIGATORIOS = ['Sal branco', 'Núcleo mineral Tortuga', 'Milho triturado'];
 
 // ── AUTH ──
 onAuthStateChanged(auth, async (user) => {
@@ -1728,6 +1745,28 @@ window.iniciarFormulacao = function(tipo) {
   document.getElementById('formSuinos').style.display = tipo === 'suinos' ? 'block' : 'none';
   document.getElementById('formAves').style.display = tipo === 'aves' ? 'block' : 'none';
   document.getElementById('resultadoFormulacao').style.display = 'none';
+  if (tipo === 'bovinos') buildIngredientesPicker();
+};
+
+function buildIngredientesPicker(){
+  _ingredientesExcluidos = [];
+  const picker = document.getElementById('ingredientesDisponiveisPicker');
+  picker.innerHTML = INGREDIENTES_BOVINOS.map(ing => {
+    const obrigatorio = INGREDIENTES_BOVINOS_OBRIGATORIOS.includes(ing);
+    return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${obrigatorio?'var(--green-dim)':'var(--surface)'};border:1px solid ${obrigatorio?'var(--green-border)':'var(--border)'};border-radius:var(--radius);cursor:${obrigatorio?'default':'pointer'}">
+      <input type="checkbox" checked ${obrigatorio?'disabled':''} onchange="toggleIngrediente('${ing}',this)" style="width:18px;height:18px;accent-color:var(--green)">
+      <span style="font-size:14px;flex:1">${ing}</span>
+      ${obrigatorio?'<span class="badge badge-green" style="font-size:10px">obrigatório</span>':''}
+    </label>`;
+  }).join('');
+}
+
+window.toggleIngrediente = function(nome, checkbox){
+  if(checkbox.checked){
+    _ingredientesExcluidos = _ingredientesExcluidos.filter(i => i !== nome);
+  } else {
+    if(!_ingredientesExcluidos.includes(nome)) _ingredientesExcluidos.push(nome);
+  }
 };
 
 window.voltarFormulacao = function() {
@@ -1755,7 +1794,8 @@ window.onFotoPasto = function(e) {
   reader.readAsDataURL(file);
 };
 
-window.gerarFormulacao = async function(tipo) {
+window.gerarFormulacao = async function(tipo, ingredientesExcluidos) {
+  ingredientesExcluidos = ingredientesExcluidos || [];
   let prompt = '';
   let tituloPag = '';
   if (tipo === 'bovinos') {
@@ -1768,9 +1808,13 @@ window.gerarFormulacao = async function(tipo) {
     const pasto = document.getElementById('bovPasto').value;
     if (!peso) { showToast('Informe o peso do animal'); return; }
     tituloPag = `🐄 Bovinos — ${fase}`;
-    prompt = `Você é um zootecnista especialista em nutrição animal. Formule uma ração para bovino com os dados abaixo. Responda SOMENTE em JSON válido, sem texto extra.
 
-Dados:
+    const listaIngredientes = INGREDIENTES_BOVINOS.filter(i => !ingredientesExcluidos.includes(i));
+    const obrigatorios = INGREDIENTES_BOVINOS_OBRIGATORIOS.filter(i => !ingredientesExcluidos.includes(i));
+
+    prompt = `Você é um zootecnista especialista em nutrição de bovinos no Brasil. Formule um suplemento/ração para o animal com os dados abaixo. Responda SOMENTE em JSON válido, sem texto extra.
+
+Dados do animal:
 - Fase: ${fase}
 - Peso atual: ${peso} arrobas
 - Meta: ${meta || 'não informada'} arrobas
@@ -1780,10 +1824,16 @@ Dados:
 - Tipo de pasto: ${pasto || 'não informado'}
 ${_fotoPastoBase64 ? '- (Foto do pasto enviada para análise)' : ''}
 
+REGRA IMPORTANTE — matérias-primas disponíveis para o produtor:
+Use APENAS estas matérias-primas na formulação, pois são as que o produtor consegue comprar na região: ${listaIngredientes.join(', ')}.
+${obrigatorios.length ? `Os seguintes itens são OBRIGATÓRIOS e devem sempre aparecer na formulação: ${obrigatorios.join(', ')}.` : 'Nenhum item obrigatório selecionado pelo produtor para esta simulação.'}
+Não inclua nenhuma matéria-prima fora dessa lista, mesmo que seria nutricionalmente ideal. Adapte os percentuais e proporções dentro do que está disponível.
+Quando recomendar núcleo mineral, use referência de Núcleo Tortuga. Quando recomendar sal, use Sal Branco comum.
+
 Retorne JSON com esta estrutura exata:
 {
   "ingredientes": [
-    {"nome": "Milho grão moído", "percentual": 60, "kgPorAnimalDia": 2.5, "unidadeCompra": "saca 60kg"},
+    {"nome": "Milho triturado", "percentual": 60, "kgPorAnimalDia": 2.5, "unidadeCompra": "saca 60kg"},
     {"nome": "Farelo de soja", "percentual": 20, "kgPorAnimalDia": 0.8, "unidadeCompra": "saca 60kg"}
   ],
   "consumoPorAnimalDia": 4.2,
@@ -1842,7 +1892,7 @@ Retorne JSON:
     if (!data.success) throw new Error(data.error || 'Erro desconhecido');
 
     const result = data.resultado;
-    _formulacaoAtual = { tipo, tituloPag, result, dados: { tipo } };
+    _formulacaoAtual = { tipo, tituloPag, result, dados: { tipo }, excluidos: ingredientesExcluidos };
     renderFormulacao(result);
   } catch(e) {
     document.getElementById('ingredientesContainer').innerHTML = `
@@ -1860,7 +1910,12 @@ function renderFormulacao(r) {
   if (r.analisePasto) {
     document.getElementById('pastAnalise').style.display = 'block';
     document.getElementById('pastAnaliseTexto').textContent = r.analisePasto;
+  } else {
+    document.getElementById('pastAnalise').style.display = 'none';
   }
+  // Botão de ajustar ingredientes só aparece para bovinos
+  document.getElementById('btnAjustarIngredientes').style.display =
+    (_formulacaoAtual && _formulacaoAtual.tipo === 'bovinos') ? 'inline-flex' : 'none';
   // Ingredientes
   const ic = document.getElementById('ingredientesContainer');
   ic.innerHTML = r.ingredientes.map((ing, i) => `<div class="ingrediente-row">
@@ -1875,6 +1930,26 @@ function renderFormulacao(r) {
   document.getElementById('recomendacoesContainer').innerHTML = r.recomendacoes.map(rec => `<p style="margin-bottom:8px">• ${rec}</p>`).join('');
   calcularCusto();
 }
+
+window.ajustarIngredientesEReformular = function(){
+  document.getElementById('formulacaoInicio').style.display = 'none';
+  document.getElementById('resultadoFormulacao').style.display = 'none';
+  document.getElementById('formBovinos').style.display = 'block';
+  buildIngredientesPicker();
+  // Marca como desmarcados os que já estavam excluídos da formulação anterior (se houver)
+  if(_formulacaoAtual && _formulacaoAtual.excluidos){
+    _formulacaoAtual.excluidos.forEach(nome=>{
+      const labels = document.querySelectorAll('#ingredientesDisponiveisPicker label');
+      labels.forEach(l=>{
+        if(l.textContent.includes(nome)){
+          const cb = l.querySelector('input[type=checkbox]');
+          if(cb && !cb.disabled){ cb.checked=false; toggleIngrediente(nome, cb); }
+        }
+      });
+    });
+  }
+  showToast('Desmarque o que não tem acesso e gere novamente');
+};
 
 window.calcularCusto = function() {
   if (!_formulacaoAtual) return;
@@ -1987,9 +2062,13 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 <script>
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove('show'), 3000);
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  if(window._tt) clearTimeout(window._tt);
+  window._tt = setTimeout(() => {
+    t.classList.remove('show');
+  }, 3000);
 }
 function fmtNum(n) {
   return (parseFloat(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
