@@ -397,7 +397,7 @@ h3{font-size:16px;font-weight:600}
     <!-- Orçamento -->
     <div class="card" style="margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <p style="font-weight:500">Orçamento</p>
+        <p style="font-weight:500">Orçamento de gastos extras</p>
         <p style="font-size:13px;color:var(--text3)"><span id="cicloOrcPct">0</span>% usado</p>
       </div>
       <div class="progress-bar" style="margin-bottom:8px">
@@ -405,8 +405,9 @@ h3{font-size:16px;font-weight:600}
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text3)">
         <span>R$ <span id="cicloGasto">0</span> gasto</span>
-        <span>Limite: R$ <span id="cicloLimite">0</span></span>
+        <span>Previsto: R$ <span id="cicloLimite">0</span></span>
       </div>
+      <p style="font-size:11px;color:var(--text4);margin-top:8px">Não inclui o valor de compra dos animais/mudas — só ração, vacina, mão de obra e outros gastos do dia a dia.</p>
     </div>
 
     <!-- Botões ação -->
@@ -1266,14 +1267,16 @@ function renderAtividades(atividades) {
     return;
   }
   container.innerHTML = atividades.map(a => {
-    const gasto = a.cicloAtual?.gastoTotal || 0;
+    const gastoExtra = a.cicloAtual?.gastoTotal || 0;
+    const investimentoInicial = a.cicloAtual?.investimentoInicial || 0;
+    const custoTotal = gastoExtra + investimentoInicial;
     const orcamento = a.cicloAtual?.orcamento || 0;
     const receita = a.cicloAtual?.receitaPrevista || 0;
     const perdas = a.cicloAtual?.perdasTotal || 0;
-    const margem = receita - gasto - perdas;
-    const pct = orcamento > 0 ? Math.min((gasto / orcamento) * 100, 100) : 0;
+    const margem = receita - custoTotal - perdas;
+    const pct = orcamento > 0 ? Math.min((gastoExtra / orcamento) * 100, 100) : 0;
     let badgeClass = 'badge-blue', badgeText = 'Em andamento';
-    if (margem > 0 && gasto > 0) { badgeClass = 'badge-green'; badgeText = 'Lucrando'; }
+    if (margem > 0 && custoTotal > 0) { badgeClass = 'badge-green'; badgeText = 'Lucrando'; }
     else if (margem < 0) { badgeClass = 'badge-red'; badgeText = 'Prejuízo'; }
     else if (pct >= 80) { badgeClass = 'badge-yellow'; badgeText = 'Atenção'; }
     const progressClass = pct >= 100 ? 'progress-red' : pct >= 80 ? 'progress-yellow' : 'progress-green';
@@ -1291,8 +1294,8 @@ function renderAtividades(atividades) {
             <div class="progress-fill ${progressClass}" style="width:${pct}%"></div>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
-            <span>R$ ${fmtNum(gasto)} gasto</span>
-            <span>Limite R$ ${fmtNum(orcamento)}</span>
+            <span>R$ ${fmtNum(gastoExtra)} gasto</span>
+            <span>Previsto R$ ${fmtNum(orcamento)}</span>
           </div>
         </div>
       </div>
@@ -1303,16 +1306,18 @@ function renderAtividades(atividades) {
 function renderDashboard(atividades) {
   let totalInvestido = 0, totalReceita = 0, alertas = [];
   atividades.forEach(a => {
-    const gasto = a.cicloAtual?.gastoTotal || 0;
+    const gastoExtra = a.cicloAtual?.gastoTotal || 0;
+    const investimentoInicial = a.cicloAtual?.investimentoInicial || 0;
+    const custoTotal = gastoExtra + investimentoInicial;
     const orcamento = a.cicloAtual?.orcamento || 0;
     const receita = a.cicloAtual?.receitaPrevista || 0;
     const perdas = a.cicloAtual?.perdasTotal || 0;
-    totalInvestido += gasto;
+    totalInvestido += custoTotal;
     totalReceita += receita;
-    const pct = orcamento > 0 ? (gasto / orcamento) * 100 : 0;
-    if (pct >= 100) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: orçamento estourado! Gasto R$ ${fmtNum(gasto)} de R$ ${fmtNum(orcamento)}` });
-    else if (pct >= 80) alertas.push({ tipo: 'yellow', msg: `<strong>${a.nome}</strong>: orçamento em ${pct.toFixed(0)}% do limite` });
-    if (receita > 0 && (gasto + perdas) > receita) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: risco de prejuízo. Gastos + perdas superam receita prevista` });
+    const pct = orcamento > 0 ? (gastoExtra / orcamento) * 100 : 0;
+    if (pct >= 100) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: orçamento de gastos extras estourado! R$ ${fmtNum(gastoExtra)} de R$ ${fmtNum(orcamento)} previstos` });
+    else if (pct >= 80) alertas.push({ tipo: 'yellow', msg: `<strong>${a.nome}</strong>: orçamento de gastos extras em ${pct.toFixed(0)}% do previsto` });
+    if (receita > 0 && (custoTotal + perdas) > receita) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: risco de prejuízo. Custos + perdas superam receita prevista` });
   });
   const margem = totalReceita - totalInvestido;
   document.getElementById('totalInvestido').textContent = 'R$ ' + fmtNum(totalInvestido);
@@ -1324,10 +1329,11 @@ function renderDashboard(atividades) {
   ac.innerHTML = alertas.map(a => `<div class="alert alert-${a.tipo}"><i class="ti ti-alert-triangle" style="color:${a.tipo==='red'?'var(--red2)':'var(--yellow2)'};flex-shrink:0;font-size:18px"></i><p style="font-size:13px;color:var(--text2)">${a.msg}</p></div>`).join('');
   document.getElementById('rankingContainer').innerHTML = atividades.length
     ? atividades.map(a => {
-        const gasto = a.cicloAtual?.gastoTotal || 0;
+        const gastoExtra = a.cicloAtual?.gastoTotal || 0;
+        const investimentoInicial = a.cicloAtual?.investimentoInicial || 0;
         const receita = a.cicloAtual?.receitaPrevista || 0;
         const perdas = a.cicloAtual?.perdasTotal || 0;
-        const resultado = receita - gasto - perdas;
+        const resultado = receita - gastoExtra - investimentoInicial - perdas;
         return `<div class="activity-card" onclick="abrirCiclo('${a.id}')">
           <div style="display:flex;align-items:center;gap:12px">
             <span style="font-size:24px">${a.icone || '🌱'}</span>
@@ -1445,8 +1451,8 @@ window.salvarAtividade = async function() {
 
   // Receita prevista = preço de venda pretendido × quantidade
   const receitaPrevista = precoVendaPrevisto * quantidadeNum;
-  // Orçamento total = preço de compra inicial (animais/mudas) + valor previsto de gastos durante o ciclo
-  const orcamentoTotal = (precoCompra * quantidadeNum) + orcamento;
+  // Investimento inicial (compra de animais/mudas) é separado do orçamento de gastos extras
+  const investimentoInicial = precoCompra * quantidadeNum;
 
   try {
     await addDoc(collection(db, 'atividades'), {
@@ -1456,8 +1462,12 @@ window.salvarAtividade = async function() {
       cicloAtual: {
         nome: cicloNome, quantidade, quantidadeNum,
         precoCompra, precoVendaPrevisto,
-        orcamento: orcamentoTotal, receitaPrevista,
-        dataInicio, dataFim, gastoTotal: precoCompra * quantidadeNum, perdasTotal: 0
+        investimentoInicial,
+        orcamento: orcamento, // só o valor previsto para gastos extras (ração, vacina, mão de obra)
+        receitaPrevista,
+        dataInicio, dataFim,
+        gastoTotal: 0, // começa zerado — só conta o que for lançado em "Lançar custo"
+        perdasTotal: 0
       }
     });
     fecharModal('modalNovaAtividade');
@@ -1490,20 +1500,23 @@ window.abrirCiclo = async function(atividadeId) {
 
 function renderCiclo() {
   if (!_cicloAtual) return;
-  const gasto = _cicloAtual.gastoTotal || 0;
+  const gastoExtra = _cicloAtual.gastoTotal || 0; // só ração, vacina, mão de obra etc.
+  const investimentoInicial = _cicloAtual.investimentoInicial || 0; // compra de animais/mudas
+  const custoTotal = gastoExtra + investimentoInicial; // usado para margem real
   const receita = _cicloAtual.receitaPrevista || 0;
   const perdas = _cicloAtual.perdasTotal || 0;
-  const orcamento = _cicloAtual.orcamento || 0;
-  const margem = receita - gasto - perdas;
-  const pct = orcamento > 0 ? Math.min((gasto / orcamento) * 100, 100) : 0;
+  const orcamento = _cicloAtual.orcamento || 0; // limite só dos gastos extras
+  const margem = receita - custoTotal - perdas;
+  const pct = orcamento > 0 ? Math.min((gastoExtra / orcamento) * 100, 100) : 0;
+
   document.getElementById('cicloReceita').textContent = 'R$ ' + fmtNum(receita);
-  document.getElementById('cicloCusto').textContent = 'R$ ' + fmtNum(gasto);
+  document.getElementById('cicloCusto').textContent = 'R$ ' + fmtNum(custoTotal);
   document.getElementById('cicloMargem').textContent = 'R$ ' + fmtNum(margem);
   document.getElementById('cicloMargem').style.color = margem >= 0 ? 'var(--green)' : 'var(--red2)';
   document.getElementById('cicloPerdas').textContent = 'R$ ' + fmtNum(perdas);
   document.getElementById('cicloOrcPct').textContent = pct.toFixed(0);
-  document.getElementById('cicloGasto').textContent = fmtNum(gasto);
-  document.getElementById('cicloLimite').textContent = fmtNum(orcamento);
+  document.getElementById('cicloGasto').textContent = fmtNum(gastoExtra); // só o que já foi gasto dos extras
+  document.getElementById('cicloLimite').textContent = fmtNum(orcamento); // limite previsto de extras
   const bar = document.getElementById('cicloOrcBar');
   bar.style.width = pct + '%';
   bar.className = 'progress-fill ' + (pct >= 100 ? 'progress-red' : pct >= 80 ? 'progress-yellow' : 'progress-green');
