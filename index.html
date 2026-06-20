@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroTec — Gestão do Sítio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--surface:#FFFFFF;--border:#E2E0D8;--border2:#D0CECC;
+  --green:#3B6D11;--green2:#639922;--green-dim:#EBF2E0;--green-border:#B8D48A;
+  --red:#A32D2D;--red2:#E24B4A;--red-dim:#FBEAEA;--red-border:#F0AAAA;
+  --yellow:#8B5E00;--yellow2:#EF9F27;--yellow-dim:#FEF3E0;--yellow-border:#F8D08A;
+  --blue:#1A4D8F;--blue2:#378ADD;--blue-dim:#E8F1FB;--blue-border:#A8C8F0;
+  --text:#1A1A1A;--text2:#4A4A4A;--text3:#7A7A7A;--text4:#AAAAAA;
+  --radius:10px;--radius-sm:6px;--radius-lg:14px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── TYPOGRAPHY ── */
+h1{font-size:24px;font-weight:600;line-height:1.2}
+h2{font-size:20px;font-weight:600;line-height:1.3}
+h3{font-size:16px;font-weight:600}
+.label{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text3);text-transform:uppercase}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:var(--radius);padding:13px 20px;font-size:15px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green2)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{border-color:var(--green);color:var(--green)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.btn-danger:hover{background:var(--red2);color:#fff}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-lg{padding:16px 28px;font-size:16px;width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── INPUTS ── */
+.input,.select,.textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--green)}
+.input::placeholder{color:var(--text4)}
+.textarea{resize:vertical;min-height:80px}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A7A7A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.input-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.input-label{font-size:13px;font-weight:500;color:var(--text2)}
+.input-big{font-size:28px;font-weight:600;text-align:center;padding:16px;color:var(--green)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.card-sm{padding:14px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;border-radius:20px;padding:3px 10px}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-red{background:var(--red-dim);color:var(--red2)}
+.badge-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+
+/* ── PROGRESS ── */
+.progress-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .3s}
+.progress-green{background:var(--green2)}
+.progress-yellow{background:var(--yellow2)}
+.progress-red{background:var(--red2)}
+
+/* ── NAV BOTTOM ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;max-width:600px;margin:0 auto}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;font-size:10px;font-weight:500;color:var(--text3);transition:color .15s;border:none;background:none;font-family:'Inter',sans-serif}
+.nav-item.active{color:var(--green)}
+.nav-item i{font-size:22px}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:17px;font-weight:600}
+.back-btn{background:none;border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;gap:4px;font-size:14px;font-family:'Inter',sans-serif;padding:0}
+.back-btn:hover{color:var(--green)}
+
+/* ── ALERT CARDS ── */
+.alert{border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.alert-red{background:var(--red-dim);border-left:3px solid var(--red2)}
+.alert-yellow{background:var(--yellow-dim);border-left:3px solid var(--yellow2)}
+.alert-green{background:var(--green-dim);border-left:3px solid var(--green2)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.divider-text{display:flex;align-items:center;gap:12px;margin:16px 0}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--border)}
+.divider-text span{font-size:12px;color:var(--text3)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px}
+.modal h3{margin-bottom:16px}
+
+/* ── ACTIVITY CARD ── */
+.activity-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.activity-card:hover{border-color:var(--green)}
+.activity-icon{width:44px;height:44px;border-radius:10px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.activity-icon.red{background:var(--red-dim)}
+.activity-icon.blue{background:var(--blue-dim)}
+
+/* ── METRIC CARDS ── */
+.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.metric-val{font-size:22px;font-weight:600;margin-bottom:2px}
+.metric-lbl{font-size:12px;color:var(--text3)}
+.metric-green .metric-val{color:var(--green)}
+.metric-red .metric-val{color:var(--red2)}
+.metric-yellow .metric-val{color:var(--yellow2)}
+.metric-blue .metric-val{color:var(--blue2)}
+
+/* ── FORMULAÇÃO ── */
+.animal-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;cursor:pointer;transition:all .15s}
+.animal-card:hover{border-color:var(--green);background:var(--green-dim)}
+.animal-card.selected{border-color:var(--green);background:var(--green-dim)}
+.animal-emoji{font-size:40px;display:block;margin-bottom:8px}
+
+/* ── INGREDIENTE ROW ── */
+.ingrediente-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ingrediente-row:last-child{border-bottom:none}
+.ingrediente-pct{font-size:12px;color:var(--text3);min-width:36px}
+.ingrediente-nome{flex:1;font-size:14px;font-weight:500}
+.ingrediente-input{width:90px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;font-family:'Inter',sans-serif;text-align:right}
+
+/* ── CUSTO ROW ── */
+.custo-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.custo-row:last-child{border-bottom:none}
+.custo-icon{width:34px;height:34px;border-radius:8px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.custo-info{flex:1}
+.custo-desc{font-size:14px;font-weight:500}
+.custo-meta{font-size:12px;color:var(--text3)}
+.custo-val{font-size:15px;font-weight:600;color:var(--text)}
+.custo-val.perda{color:var(--red2)}
+
+/* ── PLAN CARDS ── */
+.plan-card{border:2px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all .15s;position:relative}
+.plan-card:hover{border-color:var(--green)}
+.plan-card.popular{border-color:var(--green)}
+.plan-popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:#1A1A1A;color:#fff;border-radius:var(--radius);padding:12px 20px;font-size:13px;z-index:999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty i{font-size:48px;display:block;margin-bottom:12px;opacity:.4}
+.empty p{margin-bottom:16px;font-size:15px}
+
+/* ── LAYOUT ── */
+.page-content{flex:1;overflow-y:auto;padding:20px;padding-bottom:80px;max-width:600px;margin:0 auto;width:100%}
+.gap{display:flex;flex-direction:column;gap:12px}
+
+/* ── TRIAL BANNER ── */
+.trial-banner{background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+
+/* ── SPINNER ── */
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ── PHOTO UPLOAD ── */
+.photo-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .15s}
+.photo-zone:hover{border-color:var(--green);background:var(--green-dim)}
+
+/* ── CATEGORY CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.chip.active{background:var(--green-dim);border-color:var(--green);color:var(--green);font-weight:500}
+
+@media(min-width:600px){
+  body{max-width:600px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  .bottom-nav{left:50%;transform:translateX(-50%);border-radius:0}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════
+  SCREEN: LOGIN
+══════════════════════════════ -->
+<section id="screen-login" class="screen active">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;max-width:440px;margin:0 auto;width:100%">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:48px;margin-bottom:12px">🌱</div>
+      <h1 style="color:var(--green);margin-bottom:6px">AgroTec</h1>
+      <p style="color:var(--text3);font-size:15px">Gestão inteligente do seu sítio</p>
+    </div>
+
+    <!-- ABAS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:var(--radius);padding:4px;margin-bottom:24px;border:1px solid var(--border)">
+      <button id="abaCadastro" onclick="trocarAbaLogin('cadastro')" style="background:var(--surface);color:var(--green);border:none;border-radius:7px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s">Criar conta</button>
+      <button id="abaEntrar" onclick="trocarAbaLogin('entrar')" style="background:transparent;color:var(--text3);border:none;border-radius:7px;padding:10px;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s">Já tenho conta</button>
+    </div>
+
+    <!-- MODO CADASTRO -->
+    <div id="modoCadastro">
+      <div style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+        <i class="ti ti-gift" style="color:var(--green);font-size:20px"></i>
+        <p style="font-size:13px;color:var(--green);font-weight:500">30 dias grátis — sem precisar de cartão</p>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Seu nome</label>
+        <input class="input" id="nomeInput" type="text" placeholder="Ex: João Silva">
+      </div>
+      <div class="input-group">
+        <label class="input-label">E-mail ou celular</label>
+        <input class="input" id="emailCadastro" type="email" placeholder="seu@email.com">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Senha</label>
+        <input class="input" id="senhaCadastro" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nome do sítio</label>
+        <input class="input" id="nomeSitio" type="text" placeholder="Ex: Sítio São João">
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="cadastrar()">Começar 30 dias grátis</button>
+    </div>
+
+    <!-- MODO ENTRAR -->
+    <div id="modoEntrar" style="display:none">
+      <div class="input-group">
+        <label class="input-label">E-mail</label>
+        <input class="input" id="emailLogin" type="email" placeholder="seu@email.com">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Senha</label>
+        <input class="input" id="senhaLogin" type="password" placeholder="Sua senha">
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="entrar()">Entrar</button>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--text3)">
+        <a onclick="recuperarSenha()" style="color:var(--green);cursor:pointer">Esqueci minha senha</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: DASHBOARD
+══════════════════════════════ -->
+<section id="screen-dashboard" class="screen">
+  <div class="topbar">
+    <div>
+      <p style="font-size:12px;color:var(--text3)">Olá,</p>
+      <p style="font-size:17px;font-weight:600" id="greetingName">Produtor</p>
+    </div>
+    <button onclick="showScreen('perfil')" style="background:var(--green-dim);border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+      <i class="ti ti-user" style="color:var(--green);font-size:20px"></i>
+    </button>
+  </div>
+
+  <div class="page-content">
+    <!-- Trial banner -->
+    <div class="trial-banner" id="trialBanner" style="display:none">
+      <i class="ti ti-clock" style="color:var(--green);font-size:20px;flex-shrink:0"></i>
+      <p style="font-size:13px;color:var(--green)"><strong id="trialDias">30</strong> dias gratuitos restantes. <a onclick="showScreen('planos')" style="color:var(--green);font-weight:600;cursor:pointer">Ver planos →</a></p>
+    </div>
+
+    <!-- Métricas -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <p class="metric-lbl">Investido no mês</p>
+        <p class="metric-val" id="totalInvestido">R$ 0</p>
+      </div>
+      <div class="metric-card metric-green">
+        <p class="metric-lbl">Receita prevista</p>
+        <p class="metric-val" id="totalReceita">R$ 0</p>
+      </div>
+      <div class="metric-card metric-blue">
+        <p class="metric-lbl">Margem projetada</p>
+        <p class="metric-val" id="margem">R$ 0</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-lbl">Atividades ativas</p>
+        <p class="metric-val" id="totalAtividades">0</p>
+      </div>
+    </div>
+
+    <!-- Alertas -->
+    <div id="alertasContainer"></div>
+
+    <!-- Ranking -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>Atividades</h3>
+      <button class="btn btn-sm btn-secondary" onclick="showScreen('atividades')">Ver todas</button>
+    </div>
+    <div id="rankingContainer">
+      <div class="empty">
+        <i class="ti ti-plant"></i>
+        <p>Nenhuma atividade ainda</p>
+        <button class="btn btn-primary btn-sm" onclick="showScreen('atividades')">Criar primeira atividade</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="showScreen('dashboard')" id="nav-dashboard">
+      <i class="ti ti-home"></i>Início
+    </button>
+    <button class="nav-item" onclick="showScreen('atividades')" id="nav-atividades">
+      <i class="ti ti-plant"></i>Atividades
+    </button>
+    <button class="nav-item" onclick="showScreen('formulacao')" id="nav-formulacao">
+      <i class="ti ti-wheat"></i>Ração
+    </button>
+    <button class="nav-item" onclick="showScreen('historico')" id="nav-historico">
+      <i class="ti ti-chart-bar"></i>Histórico
+    </button>
+    <button class="nav-item" onclick="showScreen('perfil')" id="nav-perfil">
+      <i class="ti ti-user"></i>Perfil
+    </button>
+  </nav>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: ATIVIDADES
+══════════════════════════════ -->
+<section id="screen-atividades" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">Atividades</span>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalNovaAtividade()">
+      <i class="ti ti-plus"></i> Nova
+    </button>
+  </div>
+  <div class="page-content">
+    <div id="atividadesContainer">
+      <div class="empty">
+        <i class="ti ti-plant"></i>
+        <p>Nenhuma atividade cadastrada</p>
+        <button class="btn btn-primary" onclick="abrirModalNovaAtividade()">
+          <i class="ti ti-plus"></i> Criar atividade
+        </button>
+      </div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
+    <button class="nav-item active" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
+    <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
+  </nav>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: DETALHE CICLO
+══════════════════════════════ -->
+<section id="screen-ciclo" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('atividades')"><i class="ti ti-arrow-left"></i> Voltar</button>
+    <span class="topbar-title" id="cicloNomeTop"></span>
+    <button onclick="abrirModalFecharCiclo()" class="btn btn-sm btn-secondary">Fechar ciclo</button>
+  </div>
+  <div class="page-content">
+    <!-- Card resultado -->
+    <div class="card" style="margin-bottom:16px">
+      <p class="label" style="margin-bottom:12px">Resultado projetado</p>
+      <div class="metrics-row" style="margin-bottom:0">
+        <div class="metric-card metric-green" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Receita prevista</p>
+          <p class="metric-val" id="cicloReceita" style="font-size:18px">R$ 0</p>
+        </div>
+        <div class="metric-card metric-red" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Custo acumulado</p>
+          <p class="metric-val" id="cicloCusto" style="font-size:18px">R$ 0</p>
+        </div>
+        <div class="metric-card" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Margem projetada</p>
+          <p class="metric-val" id="cicloMargem" style="font-size:18px">R$ 0</p>
+        </div>
+        <div class="metric-card" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Perdas</p>
+          <p class="metric-val" id="cicloPerdas" style="font-size:18px;color:var(--red2)">R$ 0</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orçamento -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <p style="font-weight:500">Orçamento</p>
+        <p style="font-size:13px;color:var(--text3)"><span id="cicloOrcPct">0</span>% usado</p>
+      </div>
+      <div class="progress-bar" style="margin-bottom:8px">
+        <div class="progress-fill progress-green" id="cicloOrcBar" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text3)">
+        <span>R$ <span id="cicloGasto">0</span> gasto</span>
+        <span>Limite: R$ <span id="cicloLimite">0</span></span>
+      </div>
+    </div>
+
+    <!-- Botões ação -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <button class="btn btn-primary" onclick="abrirModalLancarCusto()">
+        <i class="ti ti-plus"></i> Lançar custo
+      </button>
+      <button class="btn btn-danger" onclick="abrirModalRegistrarPerda()">
+        <i class="ti ti-alert-triangle"></i> Registrar perda
+      </button>
+    </div>
+
+    <!-- Lista custos -->
+    <h3 style="margin-bottom:12px">Custos lançados</h3>
+    <div id="custosContainer">
+      <p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhum custo lançado ainda</p>
+    </div>
+
+    <!-- Lista perdas -->
+    <h3 style="margin-bottom:12px;margin-top:20px">Perdas e mortalidade</h3>
+    <div id="perdasContainer">
+      <p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhuma perda registrada</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: FORMULAÇÃO DE RAÇÃO
+══════════════════════════════ -->
+<section id="screen-formulacao" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">Formulação de Ração</span>
+  </div>
+  <div class="page-content">
+    <!-- Escolha animal -->
+    <div id="formulacaoInicio">
+      <p style="color:var(--text3);margin-bottom:16px;font-size:14px">Escolha o tipo de animal para formular a ração ideal:</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px">
+        <div class="animal-card" onclick="iniciarFormulacao('bovinos')">
+          <span class="animal-emoji">🐄</span>
+          <p style="font-size:13px;font-weight:500">Bovinos</p>
+          <p style="font-size:11px;color:var(--text3)">Boi, vaca, bezerro</p>
+        </div>
+        <div class="animal-card" onclick="iniciarFormulacao('suinos')">
+          <span class="animal-emoji">🐷</span>
+          <p style="font-size:13px;font-weight:500">Suínos</p>
+          <p style="font-size:11px;color:var(--text3)">Leitão, terminação</p>
+        </div>
+        <div class="animal-card" onclick="iniciarFormulacao('aves')">
+          <span class="animal-emoji">🐔</span>
+          <p style="font-size:13px;font-weight:500">Aves</p>
+          <p style="font-size:11px;color:var(--text3)">Frango, galinha</p>
+        </div>
+      </div>
+
+      <!-- Formulações salvas -->
+      <h3 style="margin-bottom:12px">Minhas formulações salvas</h3>
+      <div id="formulacoesSalvas">
+        <div class="empty">
+          <i class="ti ti-wheat"></i>
+          <p>Nenhuma formulação salva ainda</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário bovinos -->
+    <div id="formBovinos" style="display:none">
+      <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Voltar</button>
+      <h2 style="margin-bottom:4px">🐄 Bovinos</h2>
+      <p style="color:var(--text3);font-size:14px;margin-bottom:20px">Preencha os dados do animal para receber a formulação</p>
+      <div class="input-group">
+        <label class="input-label">Fase / Tipo</label>
+        <select class="select" id="bovFase">
+          <option value="bezerro">Bezerro</option>
+          <option value="novilho">Novilho</option>
+          <option value="engorda">Boi em engorda</option>
+          <option value="lactacao">Vaca em lactação</option>
+          <option value="reprodutor">Reprodutor</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Peso atual (arrobas)</label>
+          <input class="input" id="bovPeso" type="number" placeholder="Ex: 15">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Meta (arrobas)</label>
+          <input class="input" id="bovMeta" type="number" placeholder="Ex: 20">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Objetivo</label>
+        <select class="select" id="bovObjetivo">
+          <option value="engorda">Engorda</option>
+          <option value="leite">Produção de leite</option>
+          <option value="reproducao">Reprodução</option>
+          <option value="manutencao">Manutenção</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Região do Brasil</label>
+          <select class="select" id="bovRegiao">
+            <option value="sudeste">Sudeste</option>
+            <option value="nordeste">Nordeste</option>
+            <option value="centro-oeste">Centro-Oeste</option>
+            <option value="sul">Sul</option>
+            <option value="norte">Norte</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Época do ano</label>
+          <select class="select" id="bovEpoca">
+            <option value="seca">Seca (mai–set)</option>
+            <option value="chuva">Chuva (out–abr)</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tipo de pasto (descreva)</label>
+        <input class="input" id="bovPasto" type="text" placeholder="Ex: Brachiaria brizantha, Mombaça, Tifton">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Foto do pasto (opcional)</label>
+        <div class="photo-zone" onclick="tirarFotoPasto()" id="fotoPastoZone">
+          <i class="ti ti-camera" style="font-size:28px;color:var(--text4);display:block;margin-bottom:8px"></i>
+          <p style="font-size:13px;color:var(--text3)">Toque para tirar foto ou carregar da galeria</p>
+          <p style="font-size:11px;color:var(--text4);margin-top:4px">A IA analisa a qualidade do pasto</p>
+        </div>
+        <input type="file" id="fotoPastoInput" accept="image/*" style="display:none" onchange="onFotoPasto(event)">
+        <img id="fotoPastoPreview" style="display:none;width:100%;border-radius:var(--radius);margin-top:8px;max-height:200px;object-fit:cover" src="" alt="Foto do pasto">
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('bovinos')">
+        <i class="ti ti-sparkles"></i> Gerar formulação
+      </button>
+    </div>
+
+    <!-- Formulário suínos -->
+    <div id="formSuinos" style="display:none">
+      <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Voltar</button>
+      <h2 style="margin-bottom:4px">🐷 Suínos</h2>
+      <p style="color:var(--text3);font-size:14px;margin-bottom:20px">Preencha os dados para a formulação</p>
+      <div class="input-group">
+        <label class="input-label">Fase</label>
+        <select class="select" id="suiFase">
+          <option value="leitao">Leitão (até 30kg)</option>
+          <option value="crescimento">Crescimento (30–60kg)</option>
+          <option value="terminacao">Terminação (60–100kg)</option>
+          <option value="gestante">Porca gestante</option>
+          <option value="lactacao">Porca em lactação</option>
+          <option value="reprodutor">Reprodutor</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Peso médio (kg)</label>
+          <input class="input" id="suiPeso" type="number" placeholder="Ex: 30">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Quantidade de animais</label>
+          <input class="input" id="suiQtd" type="number" placeholder="Ex: 20">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('suinos')">
+        <i class="ti ti-sparkles"></i> Gerar formulação
+      </button>
+    </div>
+
+    <!-- Formulário aves -->
+    <div id="formAves" style="display:none">
+      <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Voltar</button>
+      <h2 style="margin-bottom:4px">🐔 Aves</h2>
+      <p style="color:var(--text3);font-size:14px;margin-bottom:20px">Preencha os dados para a formulação</p>
+      <div class="input-group">
+        <label class="input-label">Tipo de ave</label>
+        <select class="select" id="aveTipo">
+          <option value="frango-corte">Frango de corte</option>
+          <option value="poedeira">Galinha poedeira</option>
+          <option value="caipira">Frango caipira</option>
+          <option value="peru">Peru</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Fase</label>
+        <select class="select" id="aveFase">
+          <option value="pintinho">Pintinho (1–21 dias)</option>
+          <option value="crescimento">Crescimento (22–35 dias)</option>
+          <option value="terminacao">Terminação (36–42 dias)</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Quantidade de aves</label>
+          <input class="input" id="aveQtd" type="number" placeholder="Ex: 200">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Peso médio (kg)</label>
+          <input class="input" id="avePeso" type="number" placeholder="Ex: 0,5" step="0.1">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('aves')">
+        <i class="ti ti-sparkles"></i> Gerar formulação
+      </button>
+    </div>
+
+    <!-- Resultado formulação -->
+    <div id="resultadoFormulacao" style="display:none">
+      <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Nova formulação</button>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+        <h2 id="resultadoTitulo">Formulação</h2>
+        <button class="btn btn-sm btn-secondary" onclick="salvarFormulacao()"><i class="ti ti-bookmark"></i> Salvar</button>
+      </div>
+
+      <div id="pastAnalise" style="display:none" class="card" style="margin-bottom:16px;background:var(--green-dim);border-color:var(--green-border)">
+        <p class="label" style="margin-bottom:6px">Análise do pasto</p>
+        <p id="pastAnaliseTexto" style="font-size:14px;color:var(--text2)"></p>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <p class="label" style="margin-bottom:12px">Ingredientes</p>
+        <div id="ingredientesContainer"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;background:var(--green-dim);border-color:var(--green-border)">
+        <p class="label" style="margin-bottom:10px">Custo calculado</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+          <div>
+            <p style="font-size:20px;font-weight:600;color:var(--green)" id="custoPorKg">R$ 0,00</p>
+            <p style="font-size:11px;color:var(--text3)">por kg de ração</p>
+          </div>
+          <div>
+            <p style="font-size:20px;font-weight:600;color:var(--green)" id="custoAnimalDia">R$ 0,00</p>
+            <p style="font-size:11px;color:var(--text3)">por animal/dia</p>
+          </div>
+          <div>
+            <p style="font-size:20px;font-weight:600;color:var(--green)" id="custoLoteDia">R$ 0,00</p>
+            <p style="font-size:11px;color:var(--text3)">lote total/dia</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <p class="label" style="margin-bottom:10px">Recomendações</p>
+        <div id="recomendacoesContainer" style="font-size:14px;color:var(--text2);line-height:1.7"></div>
+      </div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
+    <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
+    <button class="nav-item active" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
+    <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
+  </nav>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: HISTÓRICO
+══════════════════════════════ -->
+<section id="screen-historico" class="screen">
+  <div class="topbar"><span class="topbar-title">Histórico</span></div>
+  <div class="page-content">
+    <div class="card" style="margin-bottom:16px">
+      <p class="label" style="margin-bottom:12px">Resumo do ano</p>
+      <div class="metrics-row" style="margin-bottom:0">
+        <div class="metric-card metric-green" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Lucro total</p>
+          <p class="metric-val" id="histLucro" style="font-size:18px">R$ 0</p>
+        </div>
+        <div class="metric-card" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Ciclos encerrados</p>
+          <p class="metric-val" id="histCiclos" style="font-size:18px">0</p>
+        </div>
+        <div class="metric-card" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Total investido</p>
+          <p class="metric-val" id="histInvestido" style="font-size:18px">R$ 0</p>
+        </div>
+        <div class="metric-card metric-green" style="border:none;padding:8px 0">
+          <p class="metric-lbl">Melhor atividade</p>
+          <p class="metric-val" id="histMelhor" style="font-size:14px;font-weight:500">—</p>
+        </div>
+      </div>
+    </div>
+    <h3 style="margin-bottom:12px">Ciclos encerrados</h3>
+    <div id="historicoContainer">
+      <div class="empty">
+        <i class="ti ti-chart-bar"></i>
+        <p>Nenhum ciclo encerrado ainda</p>
+      </div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
+    <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item active" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
+    <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
+  </nav>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: PERFIL
+══════════════════════════════ -->
+<section id="screen-perfil" class="screen">
+  <div class="topbar"><span class="topbar-title">Meu Perfil</span></div>
+  <div class="page-content">
+    <div class="card" style="margin-bottom:16px;text-align:center">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <i class="ti ti-user" style="font-size:28px;color:var(--green)"></i>
+      </div>
+      <h3 id="perfilNome">Carregando...</h3>
+      <p style="font-size:13px;color:var(--text3)" id="perfilEmail"></p>
+      <span class="badge badge-green" style="margin-top:8px" id="perfilPlano">Trial gratuito</span>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <p style="font-weight:500;margin-bottom:4px" id="perfilSitio">Sítio</p>
+      <p style="font-size:13px;color:var(--text3)">Nome do sítio</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:14px">Usuários do sítio</h3>
+      <div id="usuariosSitio">
+        <p style="font-size:14px;color:var(--text3)">Carregando...</p>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;margin-top:12px" onclick="convidarUsuario()">
+        <i class="ti ti-user-plus"></i> Convidar membro
+      </button>
+    </div>
+
+    <button class="btn btn-secondary" style="width:100%;margin-bottom:10px" onclick="showScreen('planos')">
+      <i class="ti ti-crown"></i> Ver planos e assinatura
+    </button>
+    <button class="btn btn-danger" style="width:100%" onclick="sair()">
+      <i class="ti ti-logout"></i> Sair da conta
+    </button>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
+    <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
+    <button class="nav-item active" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
+  </nav>
+</section>
+
+<!-- ══════════════════════════════
+  SCREEN: PLANOS
+══════════════════════════════ -->
+<section id="screen-planos" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i> Voltar</button>
+    <span class="topbar-title">Planos</span>
+    <div></div>
+  </div>
+  <div class="page-content">
+    <div class="trial-banner" id="trialBannerPlanos">
+      <i class="ti ti-clock" style="color:var(--green);font-size:20px;flex-shrink:0"></i>
+      <p style="font-size:13px;color:var(--green)"><strong id="trialDiasPlanos">30</strong> dias gratuitos restantes</p>
+    </div>
+
+    <div class="gap" style="margin-bottom:24px">
+      <div class="plan-card" onclick="selecionarPlano('individual')" id="plano-individual">
+        <h3>Individual</h3>
+        <p style="font-size:28px;font-weight:600;color:var(--green);margin:8px 0">R$ 50<span style="font-size:14px;color:var(--text3)">/mês</span></p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px">
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>1 usuário</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Atividades ilimitadas</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Formulação de ração com IA</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Alertas automáticos</li>
+        </ul>
+      </div>
+
+      <div class="plan-card popular" onclick="selecionarPlano('familia')" id="plano-familia">
+        <div class="plan-popular-badge">MAIS POPULAR</div>
+        <h3>Família</h3>
+        <p style="font-size:28px;font-weight:600;color:var(--green);margin:8px 0">R$ 75<span style="font-size:14px;color:var(--text3)">/mês</span></p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px">
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Até 3 usuários</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Rastreabilidade de lançamentos</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Tudo do Individual</li>
+        </ul>
+      </div>
+
+      <div class="plan-card" onclick="selecionarPlano('sitiogrande')" id="plano-sitiogrande">
+        <h3>Sítio Grande</h3>
+        <p style="font-size:28px;font-weight:600;color:var(--green);margin:8px 0">R$ 100<span style="font-size:14px;color:var(--text3)">/mês</span></p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px">
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Até 6 usuários</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Relatórios avançados</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Prioridade no suporte</li>
+          <li style="font-size:14px;display:flex;align-items:center;gap:8px"><i class="ti ti-check" style="color:var(--green)"></i>Tudo do Família</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-lg" id="btnAssinar" onclick="assinar()" disabled>
+      Assinar com Mercado Pago
+    </button>
+    <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:12px">Cancele quando quiser, sem multa</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+  MODALS
+══════════════════════════════ -->
+
+<!-- Modal: Nova atividade -->
+<div class="modal-overlay" id="modalNovaAtividade">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Nova atividade</h3>
+
+    <div id="modalStep1">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Que tipo de atividade você vai acompanhar?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+        <button onclick="selecionarTipoAtividade('criacao')" class="animal-card" id="tipoCriacao">
+          <span style="font-size:28px;display:block;margin-bottom:6px">🐄</span>
+          <p style="font-size:12px;font-weight:500">Criação</p>
+        </button>
+        <button onclick="selecionarTipoAtividade('plantacao')" class="animal-card" id="tipoPlantacao" style="border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%">
+          <span style="font-size:28px;display:block;margin-bottom:6px">🌱</span>
+          <p style="font-size:12px;font-weight:500">Plantação</p>
+        </button>
+        <button onclick="selecionarTipoAtividade('infraestrutura')" class="animal-card" id="tipoInfraestrutura" style="border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%">
+          <span style="font-size:28px;display:block;margin-bottom:6px">🔨</span>
+          <p style="font-size:12px;font-weight:500">Infraestrutura</p>
+        </button>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Nome da atividade</label>
+        <input class="input" id="atividadeNome" placeholder="Ex: Frangos de corte, Banana, Reforma do curral">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Ícone</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="iconePicker">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Categorias de custo (separe por vírgula)</label>
+        <input class="input" id="atividadeCategorias" placeholder="Ex: Ração, Vacina, Mão de obra, Medicamento">
+        <p style="font-size:12px;color:var(--text3);margin-top:4px">Você define as categorias que fazem sentido para essa atividade</p>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" onclick="irParaCiclo()">Próximo: criar ciclo →</button>
+    </div>
+
+    <div id="modalStep2" style="display:none">
+      <button class="back-btn" style="margin-bottom:16px" onclick="voltarStep1()"><i class="ti ti-arrow-left"></i> Voltar</button>
+      <h3 style="margin-bottom:16px">Primeiro ciclo</h3>
+      <div class="input-group">
+        <label class="input-label">Nome do ciclo</label>
+        <input class="input" id="cicloNomeInput" placeholder="Ex: Lote Junho 2026, Safra 2026">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Data de início</label>
+          <input class="input" id="cicloDataInicio" type="date">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Previsão de término</label>
+          <input class="input" id="cicloDataFim" type="date">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Quantidade <span style="color:var(--text3);font-weight:400">(ex: 80 frangos, 2 hectares)</span></label>
+        <input class="input" id="cicloQuantidade" placeholder="Ex: 80 frangos">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Orçamento limite (R$)</label>
+          <input class="input" id="cicloOrcamento" type="number" placeholder="0,00">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Receita prevista (R$)</label>
+          <input class="input" id="cicloReceitaPrev" type="number" placeholder="0,00">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="salvarAtividade()">
+        <i class="ti ti-check"></i> Criar atividade
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Lançar custo -->
+<div class="modal-overlay" id="modalLancarCusto">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Lançar custo</h3>
+    <div class="input-group" style="margin-top:16px">
+      <label class="input-label">Categoria</label>
+      <select class="select" id="custoCategoria"></select>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Valor (R$)</label>
+      <input class="input input-big" id="custoValor" type="number" placeholder="0,00" step="0.01">
+    </div>
+    <div class="input-group">
+      <label class="input-label">O que foi comprado ou pago</label>
+      <input class="input" id="custoDescricao" placeholder="Ex: 2 sacas de ração, Vacina contra Newcastle">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Data</label>
+      <input class="input" id="custoData" type="date">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Observação (opcional)</label>
+      <input class="input" id="custoObs" placeholder="Detalhe extra se precisar">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn btn-secondary" onclick="fecharModal('modalLancarCusto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCusto()">Salvar custo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Registrar perda -->
+<div class="modal-overlay" id="modalRegistrarPerda">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Registrar perda</h3>
+    <div style="display:flex;gap:0;margin:16px 0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <button id="tabMortalidade" onclick="trocarAbaPerda('mortalidade')" style="flex:1;padding:10px;border:none;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Mortalidade</button>
+      <button id="tabPerdaProducao" onclick="trocarAbaPerda('producao')" style="flex:1;padding:10px;border:none;background:var(--surface);color:var(--text3);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer">Perda de produção</button>
+    </div>
+
+    <div id="formMortalidade">
+      <div class="input-group">
+        <label class="input-label">Quantos animais morreram</label>
+        <input class="input input-big" id="mortQtd" type="number" placeholder="0">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Causa</label>
+        <select class="select" id="mortCausa">
+          <option value="doenca-respiratoria">Doença respiratória</option>
+          <option value="doenca-intestinal">Doença intestinal</option>
+          <option value="acidente">Acidente</option>
+          <option value="predador">Predador</option>
+          <option value="calor">Calor</option>
+          <option value="desconhecida">Causa desconhecida</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Valor estimado por animal (R$)</label>
+        <input class="input" id="mortValorUnit" type="number" placeholder="0,00">
+      </div>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Perda financeira estimada: <strong id="mortTotal" style="color:var(--red2)">R$ 0,00</strong></p>
+    </div>
+
+    <div id="formPerdaProducao" style="display:none">
+      <div class="input-group">
+        <label class="input-label">O que foi perdido</label>
+        <input class="input" id="perdaDesc" placeholder="Ex: Bananas apodrecidas, Galinhas doentes">
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+        <div class="input-group">
+          <label class="input-label">Quantidade</label>
+          <input class="input" id="perdaQtd" type="number" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Unidade</label>
+          <select class="select" id="perdaUnidade">
+            <option value="kg">kg</option>
+            <option value="unidade">unidade</option>
+            <option value="caixa">caixa</option>
+            <option value="cacho">cacho</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Motivo</label>
+        <select class="select" id="perdaMotivo">
+          <option value="praga">Praga</option>
+          <option value="doenca-planta">Doença da planta</option>
+          <option value="chuva">Chuva excessiva</option>
+          <option value="seca">Seca</option>
+          <option value="granizo">Granizo</option>
+          <option value="apodrecimento">Apodrecimento</option>
+          <option value="geada">Geada</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Valor de venda por unidade (R$)</label>
+        <input class="input" id="perdaValorUnit" type="number" placeholder="0,00">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <button class="btn btn-secondary" onclick="fecharModal('modalRegistrarPerda')">Cancelar</button>
+      <button class="btn btn-danger" onclick="salvarPerda()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Fechar ciclo -->
+<div class="modal-overlay" id="modalFecharCiclo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Fechar ciclo</h3>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:20px">Informe os dados da venda para calcular o resultado final</p>
+    <div class="input-group">
+      <label class="input-label">Quantidade vendida</label>
+      <input class="input" id="vendaQtd" type="number" placeholder="0">
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+      <div class="input-group">
+        <label class="input-label">Preço real de venda</label>
+        <input class="input" id="vendaPreco" type="number" placeholder="0,00">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Unidade</label>
+        <select class="select" id="vendaUnidade">
+          <option value="kg">por kg</option>
+          <option value="unidade">por unidade</option>
+          <option value="caixa">por caixa</option>
+          <option value="total">valor total</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Data da venda</label>
+      <input class="input" id="vendaData" type="date">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Comprador (opcional)</label>
+      <input class="input" id="vendaComprador" placeholder="Ex: Cooperativa, Mercado local">
+    </div>
+
+    <div id="resultadoFechamento" style="display:none;margin:16px 0">
+      <div class="divider"></div>
+      <h3 style="margin-bottom:12px">Resultado do ciclo</h3>
+      <div class="gap">
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:14px;color:var(--text2)">Receita real</span>
+          <span style="font-size:14px;font-weight:500;color:var(--green)" id="fechReceita">R$ 0,00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:14px;color:var(--text2)">Total investido</span>
+          <span style="font-size:14px;font-weight:500;color:var(--red2)" id="fechInvestido">R$ 0,00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:14px;color:var(--text2)">Perdas e mortalidade</span>
+          <span style="font-size:14px;font-weight:500;color:var(--red2)" id="fechPerdas">R$ 0,00</span>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:16px;font-weight:600">Resultado final</span>
+          <span style="font-size:18px;font-weight:700" id="fechResultado">R$ 0,00</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn btn-secondary" onclick="fecharModal('modalFecharCiclo')">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarFechamento" onclick="calcularFechamento()">Calcular resultado</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+  FIREBASE + APP LOGIC
+══════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, updateDoc, orderBy, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ══ CONFIGURE AQUI ══
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCe3EMp2nN0MlNtNBlflxFM5wv8W2Y9dQQ",
+  authDomain: "agrotec-bf5fd.firebaseapp.com",
+  projectId: "agrotec-bf5fd",
+  storageBucket: "agrotec-bf5fd.firebasestorage.app",
+  messagingSenderId: "818749632688",
+  appId: "1:818749632688:web:e52c3caa34de7ffe7c8b75"
+};
+// ANTHROPIC_KEY removida do frontend — protegida no backend (api/formular.js)
+// ══════════════════════
+
+const app = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── ESTADO GLOBAL ──
+let _user = null;
+let _sitioId = null;
+let _sitioData = null;
+let _atividadeAtual = null;
+let _cicloAtual = null;
+let _tipoAtividade = null;
+let _iconeAtividade = '🌱';
+let _planoPlanoSelecionado = null;
+let _fotoPastoBase64 = null;
+let _formulacaoAtual = null;
+let _abaPerda = 'mortalidade';
+
+// ── AUTH ──
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    _user = user;
+    await carregarSitio();
+    showScreen('dashboard');
+  } else {
+    _user = null;
+    _sitioId = null;
+    showScreen('login');
+  }
+});
+
+window.cadastrar = async function() {
+  const nome = document.getElementById('nomeInput').value.trim();
+  const email = document.getElementById('emailCadastro').value.trim();
+  const senha = document.getElementById('senhaCadastro').value;
+  const nomeSitio = document.getElementById('nomeSitio').value.trim();
+  if (!nome || !email || !senha || !nomeSitio) { showToast('Preencha todos os campos'); return; }
+  if (senha.length < 6) { showToast('Senha mínimo 6 caracteres'); return; }
+  try {
+    const r = await createUserWithEmailAndPassword(auth, email, senha);
+    const trialFim = new Date();
+    trialFim.setDate(trialFim.getDate() + 30);
+    await setDoc(doc(db, 'usuarios', r.user.uid), { nome, email, criadoEm: new Date().toISOString(), plano: 'trial', trialFim: trialFim.toISOString() });
+    const sitioRef = await addDoc(collection(db, 'sitios'), { nome: nomeSitio, donoId: r.user.uid, criadoEm: new Date().toISOString() });
+    await addDoc(collection(db, 'sitio_usuarios'), { sitioId: sitioRef.id, userId: r.user.uid, papel: 'dono', nome });
+    showToast('✓ Conta criada! Bem-vindo ao AgroTec!');
+  } catch(e) {
+    const m = { 'auth/email-already-in-use': 'E-mail já cadastrado.', 'auth/invalid-email': 'E-mail inválido.' };
+    showToast(m[e.code] || 'Erro: ' + e.message);
+  }
+};
+
+window.entrar = async function() {
+  const email = document.getElementById('emailLogin').value.trim();
+  const senha = document.getElementById('senhaLogin').value;
+  if (!email || !senha) { showToast('Preencha e-mail e senha'); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, senha);
+  } catch(e) {
+    showToast('E-mail ou senha incorretos');
+  }
+};
+
+window.sair = async function() {
+  if (confirm('Deseja sair da conta?')) await signOut(auth);
+};
+
+window.recuperarSenha = async function() {
+  const email = document.getElementById('emailLogin').value.trim();
+  if (!email) { showToast('Digite seu e-mail primeiro'); return; }
+  await sendPasswordResetEmail(auth, email);
+  showToast('✓ E-mail de recuperação enviado!');
+};
+
+// ── CARREGAR SÍTIO ──
+async function carregarSitio() {
+  const userData = await getDoc(doc(db, 'usuarios', _user.uid));
+  if (!userData.exists()) return;
+  const u = userData.data();
+  document.getElementById('greetingName').textContent = u.nome?.split(' ')[0] || 'Produtor';
+  document.getElementById('perfilNome').textContent = u.nome || '';
+  document.getElementById('perfilEmail').textContent = u.email || '';
+
+  // Trial
+  if (u.plano === 'trial' && u.trialFim) {
+    const diasRestantes = Math.ceil((new Date(u.trialFim) - new Date()) / (1000 * 60 * 60 * 24));
+    if (diasRestantes > 0) {
+      document.getElementById('trialBanner').style.display = 'flex';
+      document.getElementById('trialDias').textContent = diasRestantes;
+      document.getElementById('trialDiasPlanos').textContent = diasRestantes;
+      document.getElementById('trialBannerPlanos').style.display = 'flex';
+    }
+    document.getElementById('perfilPlano').textContent = `Trial — ${Math.max(0, diasRestantes)} dias restantes`;
+  } else {
+    document.getElementById('perfilPlano').textContent = u.plano || 'Individual';
+    document.getElementById('trialBanner').style.display = 'none';
+  }
+
+  // Carregar sítio
+  const suQuery = query(collection(db, 'sitio_usuarios'), where('userId', '==', _user.uid));
+  const suSnap = await getDocs(suQuery);
+  if (!suSnap.empty) {
+    _sitioId = suSnap.docs[0].data().sitioId;
+    const sitioSnap = await getDoc(doc(db, 'sitios', _sitioId));
+    if (sitioSnap.exists()) {
+      _sitioData = sitioSnap.data();
+      document.getElementById('perfilSitio').textContent = _sitioData.nome;
+    }
+    await carregarAtividades();
+    await carregarHistorico();
+  }
+}
+
+// ── ATIVIDADES ──
+async function carregarAtividades() {
+  if (!_sitioId) return;
+  const q = query(collection(db, 'atividades'), where('sitioId', '==', _sitioId), where('ativa', '==', true));
+  const snap = await getDocs(q);
+  const atividades = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  renderAtividades(atividades);
+  renderDashboard(atividades);
+}
+
+function renderAtividades(atividades) {
+  const container = document.getElementById('atividadesContainer');
+  if (!atividades.length) {
+    container.innerHTML = `<div class="empty"><i class="ti ti-plant"></i><p>Nenhuma atividade cadastrada</p><button class="btn btn-primary" onclick="abrirModalNovaAtividade()"><i class="ti ti-plus"></i> Criar atividade</button></div>`;
+    return;
+  }
+  container.innerHTML = atividades.map(a => {
+    const gasto = a.cicloAtual?.gastoTotal || 0;
+    const orcamento = a.cicloAtual?.orcamento || 0;
+    const receita = a.cicloAtual?.receitaPrevista || 0;
+    const perdas = a.cicloAtual?.perdasTotal || 0;
+    const margem = receita - gasto - perdas;
+    const pct = orcamento > 0 ? Math.min((gasto / orcamento) * 100, 100) : 0;
+    let badgeClass = 'badge-blue', badgeText = 'Em andamento';
+    if (margem > 0 && gasto > 0) { badgeClass = 'badge-green'; badgeText = 'Lucrando'; }
+    else if (margem < 0) { badgeClass = 'badge-red'; badgeText = 'Prejuízo'; }
+    else if (pct >= 80) { badgeClass = 'badge-yellow'; badgeText = 'Atenção'; }
+    const progressClass = pct >= 100 ? 'progress-red' : pct >= 80 ? 'progress-yellow' : 'progress-green';
+    const tipoIcon = a.tipo === 'criacao' ? '🐄' : a.tipo === 'plantacao' ? '🌱' : '🔨';
+    return `<div class="activity-card" onclick="abrirCiclo('${a.id}')">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div class="activity-icon">${a.icone || tipoIcon}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <p style="font-weight:600;font-size:15px">${a.nome}</p>
+            <span class="badge ${badgeClass}">${badgeText}</span>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-bottom:10px">${a.cicloAtual?.nome || 'Sem ciclo ativo'} • ${a.cicloAtual?.quantidade || ''}</p>
+          <div class="progress-bar" style="margin-bottom:6px">
+            <div class="progress-fill ${progressClass}" style="width:${pct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
+            <span>R$ ${fmtNum(gasto)} gasto</span>
+            <span>Limite R$ ${fmtNum(orcamento)}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDashboard(atividades) {
+  let totalInvestido = 0, totalReceita = 0, alertas = [];
+  atividades.forEach(a => {
+    const gasto = a.cicloAtual?.gastoTotal || 0;
+    const orcamento = a.cicloAtual?.orcamento || 0;
+    const receita = a.cicloAtual?.receitaPrevista || 0;
+    const perdas = a.cicloAtual?.perdasTotal || 0;
+    totalInvestido += gasto;
+    totalReceita += receita;
+    const pct = orcamento > 0 ? (gasto / orcamento) * 100 : 0;
+    if (pct >= 100) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: orçamento estourado! Gasto R$ ${fmtNum(gasto)} de R$ ${fmtNum(orcamento)}` });
+    else if (pct >= 80) alertas.push({ tipo: 'yellow', msg: `<strong>${a.nome}</strong>: orçamento em ${pct.toFixed(0)}% do limite` });
+    if (receita > 0 && (gasto + perdas) > receita) alertas.push({ tipo: 'red', msg: `<strong>${a.nome}</strong>: risco de prejuízo. Gastos + perdas superam receita prevista` });
+  });
+  const margem = totalReceita - totalInvestido;
+  document.getElementById('totalInvestido').textContent = 'R$ ' + fmtNum(totalInvestido);
+  document.getElementById('totalReceita').textContent = 'R$ ' + fmtNum(totalReceita);
+  document.getElementById('margem').textContent = 'R$ ' + fmtNum(margem);
+  document.getElementById('margem').style.color = margem >= 0 ? 'var(--green)' : 'var(--red2)';
+  document.getElementById('totalAtividades').textContent = atividades.length;
+  const ac = document.getElementById('alertasContainer');
+  ac.innerHTML = alertas.map(a => `<div class="alert alert-${a.tipo}"><i class="ti ti-alert-triangle" style="color:${a.tipo==='red'?'var(--red2)':'var(--yellow2)'};flex-shrink:0;font-size:18px"></i><p style="font-size:13px;color:var(--text2)">${a.msg}</p></div>`).join('');
+  document.getElementById('rankingContainer').innerHTML = atividades.length
+    ? atividades.map(a => {
+        const gasto = a.cicloAtual?.gastoTotal || 0;
+        const receita = a.cicloAtual?.receitaPrevista || 0;
+        const perdas = a.cicloAtual?.perdasTotal || 0;
+        const resultado = receita - gasto - perdas;
+        return `<div class="activity-card" onclick="abrirCiclo('${a.id}')">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:24px">${a.icone || '🌱'}</span>
+            <div style="flex:1"><p style="font-weight:500">${a.nome}</p><p style="font-size:12px;color:var(--text3)">${a.cicloAtual?.nome || ''}</p></div>
+            <span style="font-weight:600;font-size:15px;color:${resultado>=0?'var(--green)':'var(--red2)'}">R$ ${fmtNum(resultado)}</span>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty"><i class="ti ti-plant"></i><p>Nenhuma atividade ainda</p><button class="btn btn-primary btn-sm" onclick="showScreen('atividades')">Criar primeira atividade</button></div>`;
+}
+
+// ── MODAL NOVA ATIVIDADE ──
+const ICONES = ['🐄','🐷','🐔','🐟','🐑','🐐','🌽','🍌','🍉','🥬','🍅','🌾','🌱','🌿','🔨','🏗️','🪵','🚜','💧','🌳'];
+window.abrirModalNovaAtividade = function() {
+  document.getElementById('modalStep1').style.display = 'block';
+  document.getElementById('modalStep2').style.display = 'none';
+  document.getElementById('atividadeNome').value = '';
+  document.getElementById('atividadeCategorias').value = '';
+  document.getElementById('cicloNomeInput').value = '';
+  document.getElementById('cicloDataInicio').value = new Date().toISOString().split('T')[0];
+  document.getElementById('cicloDataFim').value = '';
+  document.getElementById('cicloQuantidade').value = '';
+  document.getElementById('cicloOrcamento').value = '';
+  document.getElementById('cicloReceitaPrev').value = '';
+  _tipoAtividade = null; _iconeAtividade = '🌱';
+  ['tipoCriacao','tipoPlantacao','tipoInfraestrutura'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.borderColor = 'var(--border)'; el.style.background = 'var(--surface)';
+  });
+  const picker = document.getElementById('iconePicker');
+  picker.innerHTML = ICONES.map(ic => `<button onclick="selecionarIcone('${ic}',this)" style="font-size:24px;background:none;border:2px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;transition:border-color .15s">${ic}</button>`).join('');
+  document.getElementById('modalNovaAtividade').classList.add('open');
+};
+
+window.selecionarTipoAtividade = function(tipo) {
+  _tipoAtividade = tipo;
+  ['tipoCriacao','tipoPlantacao','tipoInfraestrutura'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.borderColor = 'var(--border)'; el.style.background = 'var(--surface)';
+  });
+  const map = { criacao:'tipoCriacao', plantacao:'tipoPlantacao', infraestrutura:'tipoInfraestrutura' };
+  const el = document.getElementById(map[tipo]);
+  el.style.borderColor = 'var(--green)'; el.style.background = 'var(--green-dim)';
+};
+
+window.selecionarIcone = function(icone, btn) {
+  _iconeAtividade = icone;
+  document.querySelectorAll('#iconePicker button').forEach(b => b.style.borderColor = 'var(--border)');
+  btn.style.borderColor = 'var(--green)';
+};
+
+window.irParaCiclo = function() {
+  if (!_tipoAtividade) { showToast('Selecione o tipo de atividade'); return; }
+  if (!document.getElementById('atividadeNome').value.trim()) { showToast('Digite o nome da atividade'); return; }
+  document.getElementById('modalStep1').style.display = 'none';
+  document.getElementById('modalStep2').style.display = 'block';
+};
+
+window.voltarStep1 = function() {
+  document.getElementById('modalStep1').style.display = 'block';
+  document.getElementById('modalStep2').style.display = 'none';
+};
+
+window.salvarAtividade = async function() {
+  const nome = document.getElementById('atividadeNome').value.trim();
+  const categorias = document.getElementById('atividadeCategorias').value.split(',').map(c => c.trim()).filter(Boolean);
+  const cicloNome = document.getElementById('cicloNomeInput').value.trim();
+  const quantidade = document.getElementById('cicloQuantidade').value.trim();
+  const orcamento = parseFloat(document.getElementById('cicloOrcamento').value) || 0;
+  const receitaPrevista = parseFloat(document.getElementById('cicloReceitaPrev').value) || 0;
+  const dataInicio = document.getElementById('cicloDataInicio').value;
+  const dataFim = document.getElementById('cicloDataFim').value;
+  if (!cicloNome || !quantidade) { showToast('Preencha nome do ciclo e quantidade'); return; }
+  try {
+    const atividadeRef = await addDoc(collection(db, 'atividades'), {
+      sitioId: _sitioId, nome, tipo: _tipoAtividade, icone: _iconeAtividade,
+      categorias: categorias.length ? categorias : ['Geral'],
+      ativa: true, criadoEm: new Date().toISOString(),
+      cicloAtual: { nome: cicloNome, quantidade, orcamento, receitaPrevista, dataInicio, dataFim, gastoTotal: 0, perdasTotal: 0 }
+    });
+    fecharModal('modalNovaAtividade');
+    showToast('✓ Atividade criada com sucesso!');
+    await carregarAtividades();
+  } catch(e) { showToast('Erro: ' + e.message); }
+};
+
+// ── CICLO ──
+window.abrirCiclo = async function(atividadeId) {
+  const snap = await getDoc(doc(db, 'atividades', atividadeId));
+  if (!snap.exists()) return;
+  _atividadeAtual = { id: atividadeId, ...snap.data() };
+  _cicloAtual = _atividadeAtual.cicloAtual;
+  document.getElementById('cicloNomeTop').textContent = _atividadeAtual.nome;
+  renderCiclo();
+  await carregarCustos();
+  await carregarPerdas();
+  showScreen('ciclo');
+};
+
+function renderCiclo() {
+  if (!_cicloAtual) return;
+  const gasto = _cicloAtual.gastoTotal || 0;
+  const receita = _cicloAtual.receitaPrevista || 0;
+  const perdas = _cicloAtual.perdasTotal || 0;
+  const orcamento = _cicloAtual.orcamento || 0;
+  const margem = receita - gasto - perdas;
+  const pct = orcamento > 0 ? Math.min((gasto / orcamento) * 100, 100) : 0;
+  document.getElementById('cicloReceita').textContent = 'R$ ' + fmtNum(receita);
+  document.getElementById('cicloCusto').textContent = 'R$ ' + fmtNum(gasto);
+  document.getElementById('cicloMargem').textContent = 'R$ ' + fmtNum(margem);
+  document.getElementById('cicloMargem').style.color = margem >= 0 ? 'var(--green)' : 'var(--red2)';
+  document.getElementById('cicloPerdas').textContent = 'R$ ' + fmtNum(perdas);
+  document.getElementById('cicloOrcPct').textContent = pct.toFixed(0);
+  document.getElementById('cicloGasto').textContent = fmtNum(gasto);
+  document.getElementById('cicloLimite').textContent = fmtNum(orcamento);
+  const bar = document.getElementById('cicloOrcBar');
+  bar.style.width = pct + '%';
+  bar.className = 'progress-fill ' + (pct >= 100 ? 'progress-red' : pct >= 80 ? 'progress-yellow' : 'progress-green');
+}
+
+async function carregarCustos() {
+  if (!_atividadeAtual) return;
+  const q = query(collection(db, 'lancamentos'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome), orderBy('data', 'desc'));
+  const snap = await getDocs(q);
+  const custos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const container = document.getElementById('custosContainer');
+  if (!custos.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhum custo lançado ainda</p>'; return; }
+  container.innerHTML = custos.map(c => `<div class="custo-row">
+    <div class="custo-icon"><i class="ti ti-cash" style="color:var(--green)"></i></div>
+    <div class="custo-info">
+      <p class="custo-desc">${c.descricao}</p>
+      <p class="custo-meta">${c.categoria} • ${c.data} • ${c.usuario}</p>
+    </div>
+    <span class="custo-val">R$ ${fmtNum(c.valor)}</span>
+  </div>`).join('');
+}
+
+async function carregarPerdas() {
+  if (!_atividadeAtual) return;
+  const q = query(collection(db, 'perdas'), where('atividadeId', '==', _atividadeAtual.id), where('cicloNome', '==', _cicloAtual.nome));
+  const snap = await getDocs(q);
+  const perdas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const container = document.getElementById('perdasContainer');
+  if (!perdas.length) { container.innerHTML = '<p style="color:var(--text3);font-size:14px;text-align:center;padding:20px">Nenhuma perda registrada</p>'; return; }
+  container.innerHTML = perdas.map(p => `<div class="custo-row">
+    <div class="custo-icon" style="background:var(--red-dim)"><i class="ti ti-alert-triangle" style="color:var(--red2)"></i></div>
+    <div class="custo-info">
+      <p class="custo-desc">${p.tipo === 'mortalidade' ? `${p.quantidade} animal(is) — ${p.causa}` : p.descricao}</p>
+      <p class="custo-meta">${p.tipo === 'mortalidade' ? 'Mortalidade' : 'Perda de produção'} • ${p.data}</p>
+    </div>
+    <span class="custo-val perda">-R$ ${fmtNum(p.valorTotal)}</span>
+  </div>`).join('');
+}
+
+// ── LANÇAR CUSTO ──
+window.abrirModalLancarCusto = function() {
+  if (!_atividadeAtual) return;
+  const select = document.getElementById('custoCategoria');
+  const cats = _atividadeAtual.categorias || ['Geral'];
+  select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('custoValor').value = '';
+  document.getElementById('custoDescricao').value = '';
+  document.getElementById('custoData').value = new Date().toISOString().split('T')[0];
+  document.getElementById('custoObs').value = '';
+  document.getElementById('modalLancarCusto').classList.add('open');
+};
+
+window.salvarCusto = async function() {
+  const valor = parseFloat(document.getElementById('custoValor').value);
+  const descricao = document.getElementById('custoDescricao').value.trim();
+  const categoria = document.getElementById('custoCategoria').value;
+  const data = document.getElementById('custoData').value;
+  if (!valor || !descricao || !data) { showToast('Preencha valor, descrição e data'); return; }
+  const userData = await getDoc(doc(db, 'usuarios', _user.uid));
+  const nomeUsuario = userData.data()?.nome || 'Usuário';
+  await addDoc(collection(db, 'lancamentos'), {
+    atividadeId: _atividadeAtual.id, sitioId: _sitioId, cicloNome: _cicloAtual.nome,
+    categoria, descricao, valor, data, usuario: nomeUsuario, userId: _user.uid,
+    obs: document.getElementById('custoObs').value, criadoEm: new Date().toISOString()
+  });
+  const novoGasto = (_cicloAtual.gastoTotal || 0) + valor;
+  _cicloAtual.gastoTotal = novoGasto;
+  await updateDoc(doc(db, 'atividades', _atividadeAtual.id), { 'cicloAtual.gastoTotal': novoGasto });
+  fecharModal('modalLancarCusto');
+  showToast(`✓ R$ ${fmtNum(valor)} lançado`);
+  renderCiclo();
+  await carregarCustos();
+};
+
+// ── REGISTRAR PERDA ──
+window.abrirModalRegistrarPerda = function() {
+  document.getElementById('mortQtd').value = '';
+  document.getElementById('mortValorUnit').value = '';
+  document.getElementById('mortTotal').textContent = 'R$ 0,00';
+  document.getElementById('perdaDesc').value = '';
+  document.getElementById('perdaQtd').value = '';
+  document.getElementById('perdaValorUnit').value = '';
+  trocarAbaPerda('mortalidade');
+  document.getElementById('modalRegistrarPerda').classList.add('open');
+};
+
+window.trocarAbaPerda = function(aba) {
+  _abaPerda = aba;
+  document.getElementById('formMortalidade').style.display = aba === 'mortalidade' ? 'block' : 'none';
+  document.getElementById('formPerdaProducao').style.display = aba === 'producao' ? 'block' : 'none';
+  document.getElementById('tabMortalidade').style.background = aba === 'mortalidade' ? 'var(--green)' : 'var(--surface)';
+  document.getElementById('tabMortalidade').style.color = aba === 'mortalidade' ? '#fff' : 'var(--text3)';
+  document.getElementById('tabPerdaProducao').style.background = aba === 'producao' ? 'var(--green)' : 'var(--surface)';
+  document.getElementById('tabPerdaProducao').style.color = aba === 'producao' ? '#fff' : 'var(--text3)';
+};
+
+document.getElementById('mortQtd')?.addEventListener('input', () => {
+  const qtd = parseFloat(document.getElementById('mortQtd').value) || 0;
+  const unit = parseFloat(document.getElementById('mortValorUnit').value) || 0;
+  document.getElementById('mortTotal').textContent = 'R$ ' + fmtNum(qtd * unit);
+});
+document.getElementById('mortValorUnit')?.addEventListener('input', () => {
+  const qtd = parseFloat(document.getElementById('mortQtd').value) || 0;
+  const unit = parseFloat(document.getElementById('mortValorUnit').value) || 0;
+  document.getElementById('mortTotal').textContent = 'R$ ' + fmtNum(qtd * unit);
+});
+
+window.salvarPerda = async function() {
+  let valorTotal = 0, dadosPerda = {};
+  if (_abaPerda === 'mortalidade') {
+    const qtd = parseFloat(document.getElementById('mortQtd').value) || 0;
+    const unit = parseFloat(document.getElementById('mortValorUnit').value) || 0;
+    if (!qtd) { showToast('Informe a quantidade'); return; }
+    valorTotal = qtd * unit;
+    dadosPerda = { tipo: 'mortalidade', quantidade: qtd, causa: document.getElementById('mortCausa').value, valorUnit: unit };
+  } else {
+    const qtd = parseFloat(document.getElementById('perdaQtd').value) || 0;
+    const unit = parseFloat(document.getElementById('perdaValorUnit').value) || 0;
+    const desc = document.getElementById('perdaDesc').value.trim();
+    if (!qtd || !desc) { showToast('Preencha descrição e quantidade'); return; }
+    valorTotal = qtd * unit;
+    dadosPerda = { tipo: 'producao', descricao: desc, quantidade: qtd, unidade: document.getElementById('perdaUnidade').value, motivo: document.getElementById('perdaMotivo').value, valorUnit: unit };
+  }
+  await addDoc(collection(db, 'perdas'), {
+    ...dadosPerda, atividadeId: _atividadeAtual.id, sitioId: _sitioId,
+    cicloNome: _cicloAtual.nome, valorTotal, data: new Date().toISOString().split('T')[0],
+    userId: _user.uid, criadoEm: new Date().toISOString()
+  });
+  const novasPerdas = (_cicloAtual.perdasTotal || 0) + valorTotal;
+  _cicloAtual.perdasTotal = novasPerdas;
+  await updateDoc(doc(db, 'atividades', _atividadeAtual.id), { 'cicloAtual.perdasTotal': novasPerdas });
+  fecharModal('modalRegistrarPerda');
+  showToast(`✓ Perda de R$ ${fmtNum(valorTotal)} registrada`);
+  renderCiclo();
+  await carregarPerdas();
+};
+
+// ── FECHAR CICLO ──
+let _modoFechamento = 'calcular';
+window.abrirModalFecharCiclo = function() {
+  _modoFechamento = 'calcular';
+  document.getElementById('vendaQtd').value = '';
+  document.getElementById('vendaPreco').value = '';
+  document.getElementById('vendaData').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vendaComprador').value = '';
+  document.getElementById('resultadoFechamento').style.display = 'none';
+  document.getElementById('btnConfirmarFechamento').textContent = 'Calcular resultado';
+  document.getElementById('modalFecharCiclo').classList.add('open');
+};
+
+window.calcularFechamento = async function() {
+  if (_modoFechamento === 'calcular') {
+    const qtd = parseFloat(document.getElementById('vendaQtd').value) || 0;
+    const preco = parseFloat(document.getElementById('vendaPreco').value) || 0;
+    const unidade = document.getElementById('vendaUnidade').value;
+    if (!qtd || !preco) { showToast('Informe quantidade e preço'); return; }
+    const receita = unidade === 'total' ? preco : qtd * preco;
+    const investido = _cicloAtual.gastoTotal || 0;
+    const perdas = _cicloAtual.perdasTotal || 0;
+    const resultado = receita - investido - perdas;
+    document.getElementById('fechReceita').textContent = 'R$ ' + fmtNum(receita);
+    document.getElementById('fechInvestido').textContent = 'R$ ' + fmtNum(investido);
+    document.getElementById('fechPerdas').textContent = 'R$ ' + fmtNum(perdas);
+    document.getElementById('fechResultado').textContent = 'R$ ' + fmtNum(resultado);
+    document.getElementById('fechResultado').style.color = resultado >= 0 ? 'var(--green)' : 'var(--red2)';
+    document.getElementById('resultadoFechamento').style.display = 'block';
+    document.getElementById('btnConfirmarFechamento').textContent = 'Confirmar e arquivar';
+    _modoFechamento = 'confirmar';
+    _cicloAtual._receitaReal = receita;
+    _cicloAtual._resultadoFinal = resultado;
+  } else {
+    await fecharCicloConfirmar();
+  }
+};
+
+async function fecharCicloConfirmar() {
+  const cicloArquivado = {
+    ..._cicloAtual, atividadeId: _atividadeAtual.id, atividadeNome: _atividadeAtual.nome,
+    sitioId: _sitioId, receitaReal: _cicloAtual._receitaReal, resultadoFinal: _cicloAtual._resultadoFinal,
+    comprador: document.getElementById('vendaComprador').value, dataVenda: document.getElementById('vendaData').value,
+    encerradoEm: new Date().toISOString()
+  };
+  await addDoc(collection(db, 'ciclos_historico'), cicloArquivado);
+  await updateDoc(doc(db, 'atividades', _atividadeAtual.id), {
+    'cicloAtual.nome': '', 'cicloAtual.gastoTotal': 0, 'cicloAtual.perdasTotal': 0,
+    'cicloAtual.encerrado': true
+  });
+  fecharModal('modalFecharCiclo');
+  showToast('✓ Ciclo encerrado e arquivado!');
+  await carregarAtividades();
+  await carregarHistorico();
+  showScreen('atividades');
+}
+
+// ── HISTÓRICO ──
+async function carregarHistorico() {
+  if (!_sitioId) return;
+  const q = query(collection(db, 'ciclos_historico'), where('sitioId', '==', _sitioId));
+  const snap = await getDocs(q);
+  const ciclos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const container = document.getElementById('historicoContainer');
+  if (!ciclos.length) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-chart-bar"></i><p>Nenhum ciclo encerrado ainda</p></div>';
+    document.getElementById('histLucro').textContent = 'R$ 0';
+    document.getElementById('histCiclos').textContent = '0';
+    document.getElementById('histInvestido').textContent = 'R$ 0';
+    return;
+  }
+  const totalLucro = ciclos.reduce((s, c) => s + (c.resultadoFinal || 0), 0);
+  const totalInvestido = ciclos.reduce((s, c) => s + (c.gastoTotal || 0), 0);
+  const melhor = ciclos.reduce((m, c) => (!m || (c.resultadoFinal || 0) > (m.resultadoFinal || 0)) ? c : m, null);
+  document.getElementById('histLucro').textContent = 'R$ ' + fmtNum(totalLucro);
+  document.getElementById('histLucro').style.color = totalLucro >= 0 ? 'var(--green)' : 'var(--red2)';
+  document.getElementById('histCiclos').textContent = ciclos.length;
+  document.getElementById('histInvestido').textContent = 'R$ ' + fmtNum(totalInvestido);
+  document.getElementById('histMelhor').textContent = melhor ? melhor.atividadeNome : '—';
+  container.innerHTML = ciclos.sort((a,b) => new Date(b.encerradoEm) - new Date(a.encerradoEm)).map(c => {
+    const res = c.resultadoFinal || 0;
+    const dias = c.dataInicio && c.dataVenda ? Math.ceil((new Date(c.dataVenda) - new Date(c.dataInicio)) / (1000*60*60*24)) : '—';
+    return `<div class="card card-sm" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <p style="font-weight:600;font-size:14px">${c.atividadeNome}</p>
+          <p style="font-size:13px;color:var(--text3)">${c.nome} • ${c.quantidade}</p>
+          <p style="font-size:12px;color:var(--text4);margin-top:4px">${dias} dias • Encerrado ${new Date(c.encerradoEm).toLocaleDateString('pt-BR')}</p>
+        </div>
+        <span style="font-size:16px;font-weight:700;color:${res>=0?'var(--green)':'var(--red2)'}">R$ ${fmtNum(res)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FORMULAÇÃO DE RAÇÃO ──
+window.iniciarFormulacao = function(tipo) {
+  document.getElementById('formulacaoInicio').style.display = 'none';
+  document.getElementById('formBovinos').style.display = tipo === 'bovinos' ? 'block' : 'none';
+  document.getElementById('formSuinos').style.display = tipo === 'suinos' ? 'block' : 'none';
+  document.getElementById('formAves').style.display = tipo === 'aves' ? 'block' : 'none';
+  document.getElementById('resultadoFormulacao').style.display = 'none';
+};
+
+window.voltarFormulacao = function() {
+  document.getElementById('formulacaoInicio').style.display = 'block';
+  document.getElementById('formBovinos').style.display = 'none';
+  document.getElementById('formSuinos').style.display = 'none';
+  document.getElementById('formAves').style.display = 'none';
+  document.getElementById('resultadoFormulacao').style.display = 'none';
+  _fotoPastoBase64 = null;
+  document.getElementById('fotoPastoPreview').style.display = 'none';
+  document.getElementById('fotoPastoZone').style.display = 'block';
+};
+
+window.tirarFotoPasto = function() { document.getElementById('fotoPastoInput').click(); };
+window.onFotoPasto = function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    _fotoPastoBase64 = ev.target.result;
+    document.getElementById('fotoPastoPreview').src = ev.target.result;
+    document.getElementById('fotoPastoPreview').style.display = 'block';
+    document.getElementById('fotoPastoZone').style.display = 'none';
+    showToast('✓ Foto do pasto carregada!');
+  };
+  reader.readAsDataURL(file);
+};
+
+window.gerarFormulacao = async function(tipo) {
+  let prompt = '';
+  let tituloPag = '';
+  if (tipo === 'bovinos') {
+    const fase = document.getElementById('bovFase').value;
+    const peso = document.getElementById('bovPeso').value;
+    const meta = document.getElementById('bovMeta').value;
+    const objetivo = document.getElementById('bovObjetivo').value;
+    const regiao = document.getElementById('bovRegiao').value;
+    const epoca = document.getElementById('bovEpoca').value;
+    const pasto = document.getElementById('bovPasto').value;
+    if (!peso) { showToast('Informe o peso do animal'); return; }
+    tituloPag = `🐄 Bovinos — ${fase}`;
+    prompt = `Você é um zootecnista especialista em nutrição animal. Formule uma ração para bovino com os dados abaixo. Responda SOMENTE em JSON válido, sem texto extra.
+
+Dados:
+- Fase: ${fase}
+- Peso atual: ${peso} arrobas
+- Meta: ${meta || 'não informada'} arrobas
+- Objetivo: ${objetivo}
+- Região: ${regiao}
+- Época: ${epoca}
+- Tipo de pasto: ${pasto || 'não informado'}
+${_fotoPastoBase64 ? '- (Foto do pasto enviada para análise)' : ''}
+
+Retorne JSON com esta estrutura exata:
+{
+  "ingredientes": [
+    {"nome": "Milho grão moído", "percentual": 60, "kgPorAnimalDia": 2.5, "unidadeCompra": "saca 60kg"},
+    {"nome": "Farelo de soja", "percentual": 20, "kgPorAnimalDia": 0.8, "unidadeCompra": "saca 60kg"}
+  ],
+  "consumoPorAnimalDia": 4.2,
+  "recomendacoes": ["Forneça água limpa à vontade", "Divida em 2 tratos diários"],
+  "analisePasto": "Descreva o estado do pasto aqui (somente se foto enviada, senão null)"
+}`;
+  } else if (tipo === 'suinos') {
+    const fase = document.getElementById('suiFase').value;
+    const peso = document.getElementById('suiPeso').value;
+    const qtd = document.getElementById('suiQtd').value;
+    if (!peso || !qtd) { showToast('Informe peso e quantidade'); return; }
+    tituloPag = `🐷 Suínos — ${fase}`;
+    prompt = `Você é um zootecnista especialista. Formule ração para suínos. Responda SOMENTE em JSON válido.
+
+Dados: Fase: ${fase}, Peso médio: ${peso}kg, Quantidade: ${qtd} animais
+
+Retorne JSON:
+{"ingredientes":[{"nome":"string","percentual":number,"kgPorAnimalDia":number,"unidadeCompra":"string"}],"consumoPorAnimalDia":number,"recomendacoes":["string"],"analisePasto":null}`;
+  } else {
+    const tipo2 = document.getElementById('aveTipo').value;
+    const fase = document.getElementById('aveFase').value;
+    const qtd = document.getElementById('aveQtd').value;
+    const peso = document.getElementById('avePeso').value;
+    if (!qtd) { showToast('Informe a quantidade de aves'); return; }
+    tituloPag = `🐔 ${tipo2} — ${fase}`;
+    prompt = `Você é um zootecnista especialista. Formule ração para aves. Responda SOMENTE em JSON válido.
+
+Dados: Tipo: ${tipo2}, Fase: ${fase}, Quantidade: ${qtd} aves, Peso médio: ${peso || '0.5'}kg
+
+Retorne JSON:
+{"ingredientes":[{"nome":"string","percentual":number,"kgPorAnimalDia":number,"unidadeCompra":"string"}],"consumoPorAnimalDia":number,"recomendacoes":["string"],"analisePasto":null}`;
+  }
+
+  // Mostra loading
+  document.getElementById('formBovinos').style.display = 'none';
+  document.getElementById('formSuinos').style.display = 'none';
+  document.getElementById('formAves').style.display = 'none';
+  document.getElementById('resultadoFormulacao').style.display = 'block';
+  document.getElementById('resultadoTitulo').textContent = tituloPag;
+  document.getElementById('ingredientesContainer').innerHTML = '<div class="spinner" style="margin:20px auto"></div><p style="text-align:center;color:var(--text3);font-size:14px;margin-top:12px">Calculando formulação...</p>';
+  document.getElementById('recomendacoesContainer').innerHTML = '';
+  document.getElementById('pastAnalise').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/formular', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        fotoBase64: (_fotoPastoBase64 && tipo === 'bovinos') ? _fotoPastoBase64 : null
+      })
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { throw new Error('Resposta não-JSON: ' + text.slice(0,200)); }
+    if (!data.success) throw new Error(data.error || 'Erro desconhecido');
+
+    const result = data.resultado;
+    _formulacaoAtual = { tipo, tituloPag, result, dados: { tipo } };
+    renderFormulacao(result);
+  } catch(e) {
+    showToast('Erro ao gerar formulação: ' + e.message);
+    voltarFormulacao();
+  }
+};
+
+function renderFormulacao(r) {
+  // Análise do pasto
+  if (r.analisePasto) {
+    document.getElementById('pastAnalise').style.display = 'block';
+    document.getElementById('pastAnaliseTexto').textContent = r.analisePasto;
+  }
+  // Ingredientes
+  const ic = document.getElementById('ingredientesContainer');
+  ic.innerHTML = r.ingredientes.map((ing, i) => `<div class="ingrediente-row">
+    <span class="ingrediente-pct">${ing.percentual}%</span>
+    <span class="ingrediente-nome">${ing.nome}<br><span style="font-size:11px;color:var(--text3)">${ing.kgPorAnimalDia}kg/animal/dia • ${ing.unidadeCompra}</span></span>
+    <div style="display:flex;align-items:center;gap:4px">
+      <span style="font-size:11px;color:var(--text3)">R$</span>
+      <input class="ingrediente-input" type="number" placeholder="0,00" id="preco_${i}" oninput="calcularCusto()" step="0.01">
+    </div>
+  </div>`).join('');
+  // Recomendações
+  document.getElementById('recomendacoesContainer').innerHTML = r.recomendacoes.map(rec => `<p style="margin-bottom:8px">• ${rec}</p>`).join('');
+  calcularCusto();
+}
+
+window.calcularCusto = function() {
+  if (!_formulacaoAtual) return;
+  const ings = _formulacaoAtual.result.ingredientes;
+  let custoPorKg = 0;
+  ings.forEach((ing, i) => {
+    const preco = parseFloat(document.getElementById('preco_'+i)?.value) || 0;
+    // Estima tamanho da saca baseado na unidade de compra
+    const tamSaca = ing.unidadeCompra?.includes('60') ? 60 : ing.unidadeCompra?.includes('40') ? 40 : 50;
+    const precoPorKg = preco > 0 ? preco / tamSaca : 0;
+    custoPorKg += precoPorKg * (ing.percentual / 100);
+  });
+  const consumoAnimalDia = _formulacaoAtual.result.consumoPorAnimalDia || 0;
+  const qtd = parseInt(document.getElementById('suiQtd')?.value || document.getElementById('aveQtd')?.value || '1') || 1;
+  const custoAnimalDia = custoPorKg * consumoAnimalDia;
+  const custoLoteDia = custoAnimalDia * qtd;
+  document.getElementById('custoPorKg').textContent = 'R$ ' + custoPorKg.toFixed(3);
+  document.getElementById('custoAnimalDia').textContent = 'R$ ' + custoAnimalDia.toFixed(2);
+  document.getElementById('custoLoteDia').textContent = 'R$ ' + custoLoteDia.toFixed(2);
+};
+
+window.salvarFormulacao = async function() {
+  if (!_formulacaoAtual || !_sitioId) return;
+  await addDoc(collection(db, 'formulacoes'), {
+    sitioId: _sitioId, userId: _user.uid, tipo: _formulacaoAtual.tipo,
+    titulo: _formulacaoAtual.tituloPag, resultado: _formulacaoAtual.result,
+    criadoEm: new Date().toISOString()
+  });
+  showToast('✓ Formulação salva!');
+  await carregarFormulacoesSalvas();
+};
+
+async function carregarFormulacoesSalvas() {
+  if (!_sitioId) return;
+  const q = query(collection(db, 'formulacoes'), where('sitioId', '==', _sitioId), orderBy('criadoEm', 'desc'));
+  const snap = await getDocs(q);
+  const fs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const container = document.getElementById('formulacoesSalvas');
+  if (!fs.length) { container.innerHTML = '<div class="empty"><i class="ti ti-wheat"></i><p>Nenhuma formulação salva ainda</p></div>'; return; }
+  container.innerHTML = fs.slice(0, 5).map(f => `<div class="card card-sm" style="margin-bottom:8px;cursor:pointer" onclick="verFormulacao('${f.id}')">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div><p style="font-weight:500;font-size:14px">${f.titulo}</p><p style="font-size:12px;color:var(--text3)">${new Date(f.criadoEm).toLocaleDateString('pt-BR')}</p></div>
+      <i class="ti ti-chevron-right" style="color:var(--text3)"></i>
+    </div>
+  </div>`).join('');
+}
+
+window.verFormulacao = async function(id) {
+  const snap = await getDoc(doc(db, 'formulacoes', id));
+  if (!snap.exists()) return;
+  const f = snap.data();
+  _formulacaoAtual = { tipo: f.tipo, tituloPag: f.titulo, result: f.resultado };
+  document.getElementById('formulacaoInicio').style.display = 'none';
+  document.getElementById('resultadoFormulacao').style.display = 'block';
+  document.getElementById('resultadoTitulo').textContent = f.titulo;
+  renderFormulacao(f.resultado);
+};
+
+// ── PLANOS ──
+window.selecionarPlano = function(plano) {
+  _planoPlamoSelecionado = plano;
+  ['individual','familia','sitiogrande'].forEach(p => {
+    document.getElementById('plano-'+p).style.borderColor = p === plano ? 'var(--green)' : p === 'familia' ? 'var(--green)' : 'var(--border)';
+  });
+  document.getElementById('btnAssinar').disabled = false;
+  const precos = { individual: 50, familia: 75, sitiogrande: 100 };
+  document.getElementById('btnAssinar').textContent = `Assinar por R$ ${precos[plano]}/mês`;
+};
+
+window.assinar = function() {
+  showToast('Integração com Mercado Pago em breve!');
+};
+
+window.convidarUsuario = function() {
+  showToast('Funcionalidade de convite em breve!');
+};
+
+// ── NAVEGAÇÃO ──
+window.showScreen = function(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screen)?.classList.add('active');
+  window.scrollTo(0, 0);
+  if (screen === 'formulacao') carregarFormulacoesSalvas();
+  if (screen === 'historico') carregarHistorico();
+};
+
+window.fecharModal = function(id) {
+  document.getElementById(id)?.classList.remove('open');
+};
+
+window.trocarAbaLogin = function(aba) {
+  const isCadastro = aba === 'cadastro';
+  document.getElementById('modoCadastro').style.display = isCadastro ? 'block' : 'none';
+  document.getElementById('modoEntrar').style.display = isCadastro ? 'none' : 'block';
+  document.getElementById('abaCadastro').style.background = isCadastro ? 'var(--surface)' : 'transparent';
+  document.getElementById('abaCadastro').style.color = isCadastro ? 'var(--green)' : 'var(--text3)';
+  document.getElementById('abaEntrar').style.background = isCadastro ? 'transparent' : 'var(--surface)';
+  document.getElementById('abaEntrar').style.color = isCadastro ? 'var(--text3)' : 'var(--green)';
+};
+
+// Fecha modal clicando fora
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+</script>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function fmtNum(n) {
+  return (parseFloat(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+</script>
+</body>
+</html>
