@@ -28,29 +28,44 @@ module.exports = async function handler(req, res) {
     }
     content.push({ type: 'text', text: prompt });
 
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content }]
-      })
-    });
+    // Tenta até 3 vezes em caso de erro transitório (502/503/529 - sobrecarga temporária)
+    let anthropicRes, responseText;
+    const maxTentativas = 3;
+    for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
+      anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1500,
+          messages: [{ role: 'user', content }]
+        })
+      });
 
-    const responseText = await anthropicRes.text();
+      responseText = await anthropicRes.text();
+
+      // Status que valem retry: 502, 503, 529 (sobrecarga/instabilidade temporária)
+      const statusTransitorio = [502, 503, 529].includes(anthropicRes.status);
+      if (anthropicRes.ok || !statusTransitorio || tentativa === maxTentativas) break;
+
+      await new Promise(r => setTimeout(r, 1500 * tentativa)); // espera crescente entre tentativas
+    }
+
     let data;
     try { data = JSON.parse(responseText); } catch {
-      res.status(200).send(JSON.stringify({ success: false, error: 'Resposta não-JSON da Anthropic: ' + responseText.slice(0,300) }));
+      res.status(200).send(JSON.stringify({ success: false, error: 'Servidor da IA instável (resposta não-JSON). Tente novamente em alguns segundos.' }));
       return;
     }
 
     if (!anthropicRes.ok) {
-      res.status(200).send(JSON.stringify({ success: false, error: `Anthropic HTTP ${anthropicRes.status}: ${responseText.slice(0,300)}` }));
+      const msgAmigavel = [502, 503, 529].includes(anthropicRes.status)
+        ? 'Servidor da IA está temporariamente sobrecarregado. Tente novamente em alguns segundos.'
+        : `Anthropic HTTP ${anthropicRes.status}: ${responseText.slice(0,300)}`;
+      res.status(200).send(JSON.stringify({ success: false, error: msgAmigavel }));
       return;
     }
 
