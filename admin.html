@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroTec Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--surface:#FFFFFF;--border:#E2E0D8;--border2:#D0CECC;
+  --green:#3B6D11;--green2:#639922;--green-dim:#EBF2E0;--green-border:#B8D48A;
+  --red:#A32D2D;--red2:#E24B4A;--red-dim:#FBEAEA;
+  --yellow:#8B5E00;--yellow2:#EF9F27;--yellow-dim:#FEF3E0;
+  --text:#1A1A1A;--text2:#4A4A4A;--text3:#7A7A7A;--text4:#AAAAAA;
+  --radius:10px;--radius-lg:14px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-size:18px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:8px}
+.badge{background:var(--green-dim);border:1px solid var(--green-border);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.5px}
+
+#loginWrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:24px}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;width:100%;max-width:360px;text-align:center}
+.login-box h2{font-size:22px;margin-bottom:8px}
+.login-box p{font-size:13px;color:var(--text3);margin-bottom:24px}
+.input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px}
+.input:focus{border-color:var(--green)}
+.btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;width:100%;font-family:'Inter',sans-serif}
+.btn:hover{background:var(--green2)}
+.err{color:var(--red2);font-size:12px;margin-top:8px}
+
+#dashboard{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:10px 18px;font-size:14px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 16px}
+.stat-val{font-size:26px;font-weight:600;color:var(--green);margin-bottom:4px}
+.stat-lbl{font-size:12px;color:var(--text3)}
+
+.section-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;letter-spacing:0.5px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px}
+.pedido-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.pedido-titulo{font-size:15px;font-weight:600}
+.pedido-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.pill{display:inline-block;font-size:10px;font-weight:600;border-radius:20px;padding:3px 10px}
+.pill-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.pill-green{background:var(--green-dim);color:var(--green)}
+.pill-red{background:var(--red-dim);color:var(--red2)}
+
+.ingrediente-line{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ingrediente-line:last-child{border-bottom:none}
+
+.btn-row{display:flex;gap:8px;margin-top:14px}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif}
+.btn-sm:hover{border-color:var(--green)}
+.btn-sm.primary{background:var(--green);color:#fff;border-color:var(--green)}
+
+.empty{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty i{font-size:40px;display:block;margin-bottom:12px;opacity:.4}
+.loading{text-align:center;padding:40px;color:var(--text3)}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* Catálogo de preços */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);background:var(--bg);border-bottom:1px solid var(--border)}
+td{padding:10px 16px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.price-input{width:100px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:'Inter',sans-serif}
+.btn-save-price{background:var(--green);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1A1A1A;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;z-index:999;transition:transform .3s}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><i class="ti ti-leaf"></i> AgroTec</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge">ADMIN</span>
+    <button id="btnLogout" style="display:none;background:none;border:1px solid var(--border2);border-radius:8px;padding:7px 14px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit" onclick="logout()">Sair</button>
+  </div>
+</nav>
+
+<div id="loginWrap">
+  <div class="login-box">
+    <div style="font-size:36px;margin-bottom:16px">🔐</div>
+    <h2>Painel Admin</h2>
+    <p>Entre com a conta de administrador do AgroTec</p>
+    <input class="input" id="adminEmail" type="email" placeholder="seu@email.com">
+    <input class="input" id="adminSenha" type="password" placeholder="Senha">
+    <button class="btn" onclick="fazerLogin()">Entrar no painel</button>
+    <p class="err" id="loginErr"></p>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="tabs">
+    <button class="tab active" id="tabPedidos" onclick="trocarAba('pedidos')">Pedidos de Fabricação</button>
+    <button class="tab" id="tabPrecos" onclick="trocarAba('precos')">Tabela de Preços</button>
+    <button class="tab" id="tabUsuarios" onclick="trocarAba('usuarios')">Usuários</button>
+  </div>
+
+  <!-- ABA PEDIDOS -->
+  <div id="painelPedidos">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="spinner"></div></div>
+    </div>
+    <p class="section-title">Pedidos recebidos</p>
+    <div id="pedidosContainer" class="loading"><div class="spinner"></div>Carregando pedidos...</div>
+  </div>
+
+  <!-- ABA PREÇOS -->
+  <div id="painelPrecos" style="display:none">
+    <p class="section-title">Tabela de preços dos ingredientes (bovinos)</p>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Defina o preço por unidade de compra (saca). Esses valores aparecem automaticamente pré-preenchidos quando o produtor gera uma formulação, mas ele pode editar se for comprar por conta própria.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>INGREDIENTE</th><th>PREÇO (R$)</th><th></th></tr></thead>
+        <tbody id="precosTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ABA USUÁRIOS -->
+  <div id="painelUsuarios" style="display:none">
+    <p class="section-title">Usuários cadastrados</p>
+    <div id="usuariosContainer" class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCe3EMp2nN0MlNtNBlflxFM5wv8W2Y9dQQ",
+  authDomain: "agrotec-bf5fd.firebaseapp.com",
+  projectId: "agrotec-bf5fd",
+  storageBucket: "agrotec-bf5fd.firebasestorage.app",
+  messagingSenderId: "818749632688",
+  appId: "1:818749632688:web:e52c3caa34de7ffe7c8b75"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ADMIN_EMAIL = "menezeslemes82@gmail.com"; // troque se quiser outro e-mail de admin
+
+const INGREDIENTES_BOVINOS = [
+  'Milho triturado', 'Farelo de soja', 'Torta de algodão', 'Sorgo',
+  'DDG de milho', 'Ureia pecuária', 'Núcleo mineral Tortuga', 'Sal branco'
+];
+
+function normalizarNome(nome){
+  return (nome||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+window.fazerLogin = async function(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const senha = document.getElementById('adminSenha').value;
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  if (email !== ADMIN_EMAIL) { err.textContent = 'Acesso não autorizado.'; return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, senha);
+  } catch(e) {
+    err.textContent = 'Erro: ' + e.message;
+  }
+};
+
+window.logout = async function(){
+  await signOut(auth);
+  window.location.reload();
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (user && user.email === ADMIN_EMAIL) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('btnLogout').style.display = 'block';
+    await carregarPedidos();
+    await carregarPrecos();
+  } else if (user && user.email !== ADMIN_EMAIL) {
+    await signOut(auth);
+    document.getElementById('loginErr').textContent = 'Esta conta não tem acesso ao painel admin.';
+  }
+});
+
+window.trocarAba = function(aba){
+  ['pedidos','precos','usuarios'].forEach(a=>{
+    document.getElementById('painel'+a.charAt(0).toUpperCase()+a.slice(1)).style.display = a===aba ? 'block':'none';
+    document.getElementById('tab'+a.charAt(0).toUpperCase()+a.slice(1)).classList.toggle('active', a===aba);
+  });
+  if(aba==='usuarios') carregarUsuarios();
+};
+
+// ── PEDIDOS DE FABRICAÇÃO ──
+async function carregarPedidos(){
+  try{
+    const q = query(collection(db,'pedidos_fabricacao'), orderBy('criadoEm','desc'));
+    const snap = await getDocs(q);
+    const pedidos = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderStats(pedidos);
+    renderPedidos(pedidos);
+  }catch(e){
+    document.getElementById('pedidosContainer').innerHTML = `<div class="empty">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+function renderStats(pedidos){
+  const pendentes = pedidos.filter(p=>p.status==='pendente').length;
+  const totalKg = pedidos.reduce((s,p)=>s+(p.quantidadeKg||0),0);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${pedidos.length}</div><div class="stat-lbl">Total de pedidos</div></div>
+    <div class="stat-card"><div class="stat-val">${pendentes}</div><div class="stat-lbl">Pendentes</div></div>
+    <div class="stat-card"><div class="stat-val">${totalKg.toLocaleString('pt-BR')} kg</div><div class="stat-lbl">Volume total solicitado</div></div>
+  `;
+}
+
+function renderPedidos(pedidos){
+  const container = document.getElementById('pedidosContainer');
+  if(!pedidos.length){
+    container.innerHTML = '<div class="empty"><i class="ti ti-package"></i><p>Nenhum pedido de fabricação ainda</p></div>';
+    return;
+  }
+  container.innerHTML = pedidos.map(p=>{
+    const data = p.criadoEm ? new Date(p.criadoEm).toLocaleString('pt-BR') : '—';
+    const statusClass = p.status==='pendente'?'pill-yellow':p.status==='concluido'?'pill-green':'pill-red';
+    const statusLabel = p.status==='pendente'?'Pendente':p.status==='concluido'?'Concluído':'Cancelado';
+    const ingredientesHtml = (p.ingredientes||[]).map(i=>
+      `<div class="ingrediente-line"><span>${i.nome} (${i.percentual}%)</span><span>R$ ${(i.precoInformado||0).toFixed(2)}</span></div>`
+    ).join('');
+    return `<div class="card">
+      <div class="pedido-header">
+        <div>
+          <p class="pedido-titulo">${p.titulo||'Formulação'}</p>
+          <p class="pedido-meta">${p.solicitante||p.email} • ${p.sitioNome||''} • ${data}</p>
+        </div>
+        <span class="pill ${statusClass}">${statusLabel}</span>
+      </div>
+      <p style="font-size:13px;margin-bottom:10px"><strong>${p.quantidadeKg||0} kg</strong> solicitados</p>
+      <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:10px">
+        ${ingredientesHtml||'<p style="font-size:12px;color:var(--text3)">Sem detalhes de ingredientes</p>'}
+      </div>
+      ${p.status==='pendente' ? `<div class="btn-row">
+        <button class="btn-sm primary" onclick="atualizarStatusPedido('${p.id}','concluido')">✓ Marcar concluído</button>
+        <button class="btn-sm" onclick="atualizarStatusPedido('${p.id}','cancelado')">Cancelar</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.atualizarStatusPedido = async function(id, novoStatus){
+  try{
+    await updateDoc(doc(db,'pedidos_fabricacao',id), { status: novoStatus });
+    toast('✓ Status atualizado');
+    await carregarPedidos();
+  }catch(e){ toast('Erro: '+e.message); }
+};
+
+// ── TABELA DE PREÇOS ──
+async function carregarPrecos(){
+  try{
+    const snap = await getDocs(collection(db,'catalogo_ingredientes'));
+    const precosAtuais = {};
+    snap.forEach(d=>{ const data=d.data(); precosAtuais[normalizarNome(data.nome)] = data.preco; });
+
+    const tbody = document.getElementById('precosTbody');
+    tbody.innerHTML = INGREDIENTES_BOVINOS.map(nome=>{
+      const key = normalizarNome(nome);
+      const precoAtual = precosAtuais[key] || '';
+      return `<tr>
+        <td>${nome}</td>
+        <td><input class="price-input" type="number" step="0.01" id="preco_${key}" value="${precoAtual}" placeholder="0,00"></td>
+        <td><button class="btn-save-price" onclick="salvarPreco('${nome}','${key}')">Salvar</button></td>
+      </tr>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('precosTbody').innerHTML = `<tr><td colspan="3">Erro: ${e.message}</td></tr>`;
+  }
+}
+
+window.salvarPreco = async function(nome, key){
+  const preco = parseFloat(document.getElementById('preco_'+key).value);
+  if(isNaN(preco) || preco < 0){ toast('Preço inválido'); return; }
+  try{
+    await setDoc(doc(db,'catalogo_ingredientes', key), { nome, preco, atualizadoEm: new Date().toISOString() });
+    toast(`✓ Preço de ${nome} salvo!`);
+  }catch(e){ toast('Erro: '+e.message); }
+};
+
+// ── USUÁRIOS ──
+async function carregarUsuarios(){
+  try{
+    const snap = await getDocs(collection(db,'usuarios'));
+    const usuarios = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    const container = document.getElementById('usuariosContainer');
+    if(!usuarios.length){ container.innerHTML = '<div class="empty">Nenhum usuário ainda</div>'; return; }
+    container.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>NOME</th><th>E-MAIL</th><th>PLANO</th><th>CADASTRO</th></tr></thead>
+      <tbody>${usuarios.map(u=>`<tr>
+        <td>${u.nome||'—'}</td><td>${u.email||'—'}</td><td>${u.plano||'trial'}</td>
+        <td>${u.criadoEm?new Date(u.criadoEm).toLocaleDateString('pt-BR'):'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }catch(e){
+    document.getElementById('usuariosContainer').innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+  }
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
