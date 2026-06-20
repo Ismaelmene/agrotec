@@ -538,7 +538,7 @@ h3{font-size:16px;font-weight:600}
         <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Desmarque o que você não tem acesso fácil. Sal branco, núcleo e milho são sempre obrigatórios.</p>
         <div id="ingredientesDisponiveisPicker" class="gap" style="gap:8px"></div>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('bovinos', _ingredientesExcluidos)">
+      <button class="btn btn-primary btn-lg" onclick="gerarFormulacao('bovinos', window._ingredientesExcluidos)">
         <i class="ti ti-sparkles"></i> Gerar formulação
       </button>
     </div>
@@ -1134,7 +1134,7 @@ let _planoPlanoSelecionado = null;
 let _fotoPastoBase64 = null;
 let _formulacaoAtual = null;
 let _abaPerda = 'mortalidade';
-let _ingredientesExcluidos = []; // matérias-primas que o produtor não tem acesso (só bovinos)
+window._ingredientesExcluidos = []; // matérias-primas que o produtor não tem acesso (só bovinos)
 
 // Matérias-primas disponíveis para formulação de bovinos (realidade do pequeno produtor)
 const INGREDIENTES_BOVINOS = [
@@ -1749,7 +1749,7 @@ window.iniciarFormulacao = function(tipo) {
 };
 
 function buildIngredientesPicker(){
-  _ingredientesExcluidos = [];
+  window._ingredientesExcluidos = [];
   const picker = document.getElementById('ingredientesDisponiveisPicker');
   picker.innerHTML = INGREDIENTES_BOVINOS.map(ing => {
     const obrigatorio = INGREDIENTES_BOVINOS_OBRIGATORIOS.includes(ing);
@@ -1763,9 +1763,9 @@ function buildIngredientesPicker(){
 
 window.toggleIngrediente = function(nome, checkbox){
   if(checkbox.checked){
-    _ingredientesExcluidos = _ingredientesExcluidos.filter(i => i !== nome);
+    window._ingredientesExcluidos = window._ingredientesExcluidos.filter(i => i !== nome);
   } else {
-    if(!_ingredientesExcluidos.includes(nome)) _ingredientesExcluidos.push(nome);
+    if(!window._ingredientesExcluidos.includes(nome)) window._ingredientesExcluidos.push(nome);
   }
 };
 
