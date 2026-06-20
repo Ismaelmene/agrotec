@@ -1,7 +1,7 @@
 // Vercel Serverless Function — gera formulação de ração via Claude (Anthropic)
 // Caminho: /api/formular.js
 
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "COLE_SUA_CHAVE_ANTHROPIC_AQUI";
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,6 +11,10 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') { res.status(405).send(JSON.stringify({ error: 'Method not allowed' })); return; }
+  if (!ANTHROPIC_KEY) {
+    res.status(200).send(JSON.stringify({ success: false, error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente do Vercel.' }));
+    return;
+  }
 
   try {
     const { prompt, fotoBase64 } = req.body;
