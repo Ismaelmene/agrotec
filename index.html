@@ -314,7 +314,7 @@ h3{font-size:16px;font-weight:600}
       <i class="ti ti-plant"></i>Atividades
     </button>
     <button class="nav-item" onclick="showScreen('formulacao')" id="nav-formulacao">
-      <i class="ti ti-wheat"></i>Ração
+      <i class="ti ti-bowl"></i>Ração
     </button>
     <button class="nav-item" onclick="showScreen('historico')" id="nav-historico">
       <i class="ti ti-chart-bar"></i>Histórico
@@ -349,7 +349,7 @@ h3{font-size:16px;font-weight:600}
   <nav class="bottom-nav">
     <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
     <button class="nav-item active" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
-    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-bowl"></i>Ração</button>
     <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
     <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
   </nav>
@@ -362,7 +362,13 @@ h3{font-size:16px;font-weight:600}
   <div class="topbar">
     <button class="back-btn" onclick="showScreen('atividades')"><i class="ti ti-arrow-left"></i> Voltar</button>
     <span class="topbar-title" id="cicloNomeTop"></span>
-    <button onclick="abrirModalFecharCiclo()" class="btn btn-sm btn-secondary">Fechar ciclo</button>
+    <div style="display:flex;gap:8px;align-items:center;position:relative">
+      <button onclick="abrirModalFecharCiclo()" class="btn btn-sm btn-secondary">Fechar ciclo</button>
+      <button onclick="toggleMenuCiclo()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)"><i class="ti ti-dots-vertical" style="font-size:20px"></i></button>
+      <div id="menuCiclo" style="display:none;position:absolute;top:36px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:50;min-width:180px;overflow:hidden">
+        <button onclick="confirmarExcluirAtividade()" style="width:100%;text-align:left;padding:12px 16px;background:none;border:none;color:var(--red2);font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif"><i class="ti ti-trash"></i> Excluir atividade</button>
+      </div>
+    </div>
   </div>
   <div class="page-content">
     <!-- Card resultado -->
@@ -460,7 +466,7 @@ h3{font-size:16px;font-weight:600}
       <h3 style="margin-bottom:12px">Minhas formulações salvas</h3>
       <div id="formulacoesSalvas">
         <div class="empty">
-          <i class="ti ti-wheat"></i>
+          <i class="ti ti-bowl"></i>
           <p>Nenhuma formulação salva ainda</p>
         </div>
       </div>
@@ -614,9 +620,12 @@ h3{font-size:16px;font-weight:600}
     <!-- Resultado formulação -->
     <div id="resultadoFormulacao" style="display:none">
       <button class="back-btn" style="margin-bottom:20px" onclick="voltarFormulacao()"><i class="ti ti-arrow-left"></i> Nova formulação</button>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px">
         <h2 id="resultadoTitulo">Formulação</h2>
-        <button class="btn btn-sm btn-secondary" onclick="salvarFormulacao()"><i class="ti ti-bookmark"></i> Salvar</button>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-sm btn-secondary" onclick="salvarFormulacao()"><i class="ti ti-bookmark"></i> Salvar</button>
+          <button class="btn btn-sm btn-primary" onclick="enviarParaFabricacao()"><i class="ti ti-send"></i> Enviar p/ fabricação</button>
+        </div>
       </div>
       <button id="btnAjustarIngredientes" style="display:none;background:none;border:none;color:var(--green);font-size:13px;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif" onclick="ajustarIngredientesEReformular()">
         <i class="ti ti-adjustments"></i> Não tenho acesso a algum ingrediente — ajustar e refazer
@@ -659,7 +668,7 @@ h3{font-size:16px;font-weight:600}
   <nav class="bottom-nav">
     <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
     <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
-    <button class="nav-item active" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item active" onclick="showScreen('formulacao')"><i class="ti ti-bowl"></i>Ração</button>
     <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
     <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
   </nav>
@@ -703,7 +712,7 @@ h3{font-size:16px;font-weight:600}
   <nav class="bottom-nav">
     <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
     <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
-    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-bowl"></i>Ração</button>
     <button class="nav-item active" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
     <button class="nav-item" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
   </nav>
@@ -749,7 +758,7 @@ h3{font-size:16px;font-weight:600}
   <nav class="bottom-nav">
     <button class="nav-item" onclick="showScreen('dashboard')"><i class="ti ti-home"></i>Início</button>
     <button class="nav-item" onclick="showScreen('atividades')"><i class="ti ti-plant"></i>Atividades</button>
-    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-wheat"></i>Ração</button>
+    <button class="nav-item" onclick="showScreen('formulacao')"><i class="ti ti-bowl"></i>Ração</button>
     <button class="nav-item" onclick="showScreen('historico')"><i class="ti ti-chart-bar"></i>Histórico</button>
     <button class="nav-item active" onclick="showScreen('perfil')"><i class="ti ti-user"></i>Perfil</button>
   </nav>
@@ -1645,6 +1654,32 @@ window.salvarPerda = async function() {
 
 // ── FECHAR CICLO ──
 let _modoFechamento = 'calcular';
+window.toggleMenuCiclo = function() {
+  const menu = document.getElementById('menuCiclo');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('menuCiclo');
+  if (menu && menu.style.display === 'block' && !e.target.closest('#menuCiclo') && !e.target.closest('[onclick="toggleMenuCiclo()"]')) {
+    menu.style.display = 'none';
+  }
+});
+
+window.confirmarExcluirAtividade = async function() {
+  document.getElementById('menuCiclo').style.display = 'none';
+  if (!_atividadeAtual) return;
+  const ok = confirm(`Tem certeza que deseja excluir a atividade "${_atividadeAtual.nome}"? Essa ação não pode ser desfeita e todos os custos e perdas lançados serão perdidos.`);
+  if (!ok) return;
+  try {
+    await deleteDoc(doc(db, 'atividades', _atividadeAtual.id));
+    showToast('✓ Atividade excluída');
+    showScreen('atividades');
+    await carregarAtividades();
+  } catch(e) {
+    showToast('Erro ao excluir: ' + e.message);
+  }
+};
+
 window.abrirModalFecharCiclo = function() {
   _modoFechamento = 'calcular';
   document.getElementById('vendaQtd').value = '';
@@ -1905,7 +1940,7 @@ Retorne JSON:
   }
 };
 
-function renderFormulacao(r) {
+async function renderFormulacao(r) {
   // Análise do pasto
   if (r.analisePasto) {
     document.getElementById('pastAnalise').style.display = 'block';
@@ -1916,19 +1951,45 @@ function renderFormulacao(r) {
   // Botão de ajustar ingredientes só aparece para bovinos
   document.getElementById('btnAjustarIngredientes').style.display =
     (_formulacaoAtual && _formulacaoAtual.tipo === 'bovinos') ? 'inline-flex' : 'none';
+
+  // Busca tabela de preços cadastrada pelo admin (catalogo_ingredientes)
+  const tabelaPrecos = await carregarTabelaPrecos();
+
   // Ingredientes
   const ic = document.getElementById('ingredientesContainer');
-  ic.innerHTML = r.ingredientes.map((ing, i) => `<div class="ingrediente-row">
+  ic.innerHTML = r.ingredientes.map((ing, i) => {
+    const precoTabelado = tabelaPrecos[normalizarNome(ing.nome)];
+    return `<div class="ingrediente-row">
     <span class="ingrediente-pct">${ing.percentual}%</span>
-    <span class="ingrediente-nome">${ing.nome}<br><span style="font-size:11px;color:var(--text3)">${ing.kgPorAnimalDia}kg/animal/dia • ${ing.unidadeCompra}</span></span>
+    <span class="ingrediente-nome">${ing.nome}<br><span style="font-size:11px;color:var(--text3)">${ing.kgPorAnimalDia}kg/animal/dia • ${ing.unidadeCompra}${precoTabelado?' • <span style="color:var(--green)">preço de tabela</span>':''}</span></span>
     <div style="display:flex;align-items:center;gap:4px">
       <span style="font-size:11px;color:var(--text3)">R$</span>
-      <input class="ingrediente-input" type="number" placeholder="0,00" id="preco_${i}" oninput="calcularCusto()" step="0.01">
+      <input class="ingrediente-input" type="number" placeholder="0,00" id="preco_${i}" value="${precoTabelado||''}" oninput="calcularCusto()" step="0.01">
     </div>
-  </div>`).join('');
+  </div>`;
+  }).join('');
   // Recomendações
   document.getElementById('recomendacoesContainer').innerHTML = r.recomendacoes.map(rec => `<p style="margin-bottom:8px">• ${rec}</p>`).join('');
   calcularCusto();
+}
+
+function normalizarNome(nome){
+  return (nome||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+async function carregarTabelaPrecos(){
+  try{
+    const snap = await getDocs(collection(db, 'catalogo_ingredientes'));
+    const tabela = {};
+    snap.forEach(d=>{
+      const data = d.data();
+      if(data.nome && data.preco) tabela[normalizarNome(data.nome)] = data.preco;
+    });
+    return tabela;
+  }catch(e){
+    console.warn('Tabela de preços não disponível:', e.message);
+    return {};
+  }
 }
 
 window.ajustarIngredientesEReformular = function(){
@@ -1982,13 +2043,44 @@ window.salvarFormulacao = async function() {
   await carregarFormulacoesSalvas();
 };
 
+window.enviarParaFabricacao = async function() {
+  if (!_formulacaoAtual || !_sitioId) return;
+  const qtdKg = prompt('Quantos KG de ração você deseja encomendar para fabricação?');
+  if (!qtdKg || isNaN(parseFloat(qtdKg)) || parseFloat(qtdKg) <= 0) {
+    if(qtdKg !== null) showToast('Informe uma quantidade válida em kg');
+    return;
+  }
+  const userData = await getDoc(doc(db, 'usuarios', _user.uid));
+  const nomeUsuario = userData.data()?.nome || _user.email;
+
+  // Captura os preços preenchidos no momento do envio
+  const ingredientesComPreco = _formulacaoAtual.result.ingredientes.map((ing,i)=>({
+    ...ing, precoInformado: parseFloat(document.getElementById('preco_'+i)?.value)||0
+  }));
+
+  try {
+    await addDoc(collection(db, 'pedidos_fabricacao'), {
+      sitioId: _sitioId, sitioNome: _sitioData?.nome || '',
+      userId: _user.uid, solicitante: nomeUsuario, email: _user.email,
+      tipo: _formulacaoAtual.tipo, titulo: _formulacaoAtual.tituloPag,
+      ingredientes: ingredientesComPreco,
+      quantidadeKg: parseFloat(qtdKg),
+      status: 'pendente',
+      criadoEm: new Date().toISOString()
+    });
+    showToast('✓ Pedido enviado para fabricação!');
+  } catch(e) {
+    showToast('Erro ao enviar pedido: ' + e.message);
+  }
+};
+
 async function carregarFormulacoesSalvas() {
   if (!_sitioId) return;
   const q = query(collection(db, 'formulacoes'), where('sitioId', '==', _sitioId), orderBy('criadoEm', 'desc'));
   const snap = await getDocs(q);
   const fs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const container = document.getElementById('formulacoesSalvas');
-  if (!fs.length) { container.innerHTML = '<div class="empty"><i class="ti ti-wheat"></i><p>Nenhuma formulação salva ainda</p></div>'; return; }
+  if (!fs.length) { container.innerHTML = '<div class="empty"><i class="ti ti-bowl"></i><p>Nenhuma formulação salva ainda</p></div>'; return; }
   container.innerHTML = fs.slice(0, 5).map(f => `<div class="card card-sm" style="margin-bottom:8px;cursor:pointer" onclick="verFormulacao('${f.id}')">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div><p style="font-weight:500;font-size:14px">${f.titulo}</p><p style="font-size:12px;color:var(--text3)">${new Date(f.criadoEm).toLocaleDateString('pt-BR')}</p></div>
